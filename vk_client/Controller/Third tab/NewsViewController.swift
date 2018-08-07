@@ -38,10 +38,12 @@ class NewsViewController: UITableViewController {
         if news[index].articleImageURLString == "" {
             let cell = tableView.dequeueReusableCell(withIdentifier: "TextNewsCell", for: indexPath) as! TextNewsCell
             cell.setup(news: oneNews)
+            sleep(UInt32(0.5))
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "PicNewsCell", for: indexPath) as! PicNewsCell
             cell.setup(news: oneNews)
+            sleep(UInt32(0.5))
             return cell
         }
 

@@ -61,7 +61,7 @@ extension VkLoginViewController: WKNavigationDelegate {
             return dict
         }
         
-        //print(params["access_token"])
+        print(params["access_token"])
         VKService.shared.setup(token: params["access_token"] ?? "", user_id: params["user_id"] ?? "")
         decisionHandler(.cancel)
         performSegue(withIdentifier: "Vklogin", sender: self)

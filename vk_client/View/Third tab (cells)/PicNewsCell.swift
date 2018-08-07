@@ -18,14 +18,40 @@ class PicNewsCell: UITableViewCell {
     @IBOutlet weak var commentsLabel: UILabel!
     @IBOutlet weak var repostsLabel: UILabel!
     @IBOutlet weak var viewsLabel: UILabel!
+    @IBOutlet weak var articleImageWidthConstraint: NSLayoutConstraint!
 
     func setup(news: News) {
-        self.iconImageView.kf.setImage(with: URL(string: news.iconURLString))
-        self.nameLabel.text = news.name
-        self.articleImageView.kf.setImage(with: URL(string: news.articleImageURLString))
-        self.likesLabel.text = String(news.likes)
-        self.commentsLabel.text = String(news.comments)
-        self.repostsLabel.text = String(news.reposts)
-        self.viewsLabel.text = String(news.views)
+        iconImageView.kf.setImage(with: URL(string: news.iconURLString))
+        nameLabel.text = news.name
+        articleImageView.kf.indicatorType = .activity
+        articleImageWidthConstraint.constant = 430
+        articleImageView.kf.setImage(with: URL(string: news.articleImageURLString))
+        likesLabel.text = String(news.likes)
+        commentsLabel.text = String(news.comments)
+        repostsLabel.text = String(news.reposts)
+        viewsLabel.text = String(news.views)
+        
+        // Customization
+        iconImageView.layer.cornerRadius = 20
+        iconImageView.clipsToBounds = true
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+//        if let url = URL(string: news.articleImageURLString) {
+//            KingfisherManager.shared.retrieveImage(with: url, options: nil, progressBlock: nil) {
+//                (image, error, cacheType, url) in
+//                if let image = image {
+//                    self.articleImageView.image = image
+//                }
+//            }
+//        }

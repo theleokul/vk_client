@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftyJSON
+import Kingfisher
 
 class News {
     
@@ -51,11 +52,15 @@ class News {
         // Get article's photo
         let attachments = json["attachments"].arrayValue
         
-        let photoIndex = attachments.index { (attachment) -> Bool in
-            return attachment["type"].stringValue == "photo"
-        }
+        let photoIndex = attachments.index { $0["type"].stringValue == "photo" }
+
         if let photoIndex = photoIndex {
-            self.articleImageURLString = attachments[photoIndex]["photo"]["photo_604"].stringValue
+            let photoSizes = attachments[photoIndex]["photo"]["sizes"].arrayValue
+            let xSizeIndex = photoSizes.index { $0["type"].stringValue == "x" }
+            if let xSizeIndex = xSizeIndex {
+                self.articleImageURLString = photoSizes[xSizeIndex]["src"].stringValue
+            } else { self.articleImageURLString = "" }
+            
         } else { self.articleImageURLString = "" }
 
     }

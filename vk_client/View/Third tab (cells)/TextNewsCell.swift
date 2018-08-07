@@ -20,13 +20,17 @@ class TextNewsCell: UITableViewCell {
     @IBOutlet weak var viewsLabel: UILabel!
     
     func setup(news: News) {
-        self.iconImageView.kf.setImage(with: URL(string: news.iconURLString))
-        self.nameLabel.text = news.name
-        self.articleLabel.text = news.article
-        self.likesLabel.text = String(news.likes)
-        self.commentsLabel.text = String(news.comments)
-        self.repostsLabel.text = String(news.reposts)
-        self.viewsLabel.text = String(news.views)
+        iconImageView.kf.setImage(with: URL(string: news.iconURLString))
+        nameLabel.text = news.name
+        articleLabel.text = news.article
+        likesLabel.text = String(news.likes)
+        commentsLabel.text = String(news.comments)
+        repostsLabel.text = String(news.reposts)
+        viewsLabel.text = String(news.views)
+        
+        // Customization
+        iconImageView.layer.cornerRadius = 20
+        iconImageView.clipsToBounds = true
     }
     
 }

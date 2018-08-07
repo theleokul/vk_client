@@ -174,10 +174,20 @@ class VKService {
         
         let url = "https://api.vk.com/method/newsfeed.get"
         let parameters: Parameters = [
-            "filters": "post, photo",
+            "filters": "post",
+            "photo_sizes": 1,
+            "count": 30,
             "access_token": token,
             "v": 5.80
         ]
+        //
+//        let urlT = URL(string: "https://api.vk.com/method/newsfeed.get?filters=post&count=3&access_token=3d77b20f22db542e1d06597fba09dd1d7753e022249b03ffaaf0a82b63229c89b4fe0073c344221fc2d4f&v=5.80")!
+//        let session = URLSession.shared
+//        session.dataTask(with: urlT) { (data, response, error) in
+//            let jsonT = try! JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.allowFragments)
+//            print(jsonT)
+//        }.resume()
+        //
         let request = Alamofire.request(url, parameters: parameters)
         
         let getNewsOperation = GetDataOperation(request: request)
