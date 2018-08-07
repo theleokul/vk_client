@@ -168,78 +168,31 @@ class VKService {
         }
     }
     
-    func getGroupByID(_ id: Int, completion: @escaping (String?, String?, Error?) -> Void) {
-        let url = "https://api.vk.com/method/groups.getById"
-        let parameters: Parameters = [
-            "group_id": id,
-            "access_token": token,
-            "v": 5.80
-        ]
-        
-        Alamofire.request(url, parameters: parameters).responseJSON { response in
-            guard let value = response.value else {
-                completion(nil, nil, response.error)
-                return
-            }
-            
-            let json = JSON(value)
-            //let firstAndOnlyGroup = json["response"].arrayValue.first
-            guard let firstAndOnlyGroup = json["response"].arrayValue.first else {
-                completion(nil, nil, response.error)
-                return
-            }
-            let name = firstAndOnlyGroup["name"].stringValue
-            let photoURLString = firstAndOnlyGroup["photo_100"].stringValue
-            completion(name, photoURLString, nil)
-        }
-    }
+    private let networkQueue = OperationQueue()
     
-    func getUserByID(_ id: Int, completion: @escaping (String?, String?, Error?) -> Void) {
-        let url = "https://api.vk.com/method/users.get"
-        let parameters: Parameters = [
-            "user_ids": id,
-            "fields": "photo_100",
-            "access_token": token,
-            "v": 5.80
-        ]
+    func getNewsFeedFor(_ vc: NewsViewController) {
         
-        Alamofire.request(url, parameters: parameters).responseJSON { response in
-            guard let value = response.value else {
-                completion(nil, nil, response.error)
-                return
-            }
-            
-            let json = JSON(value)
-            guard let firstAndOnlyUser = json["response"].arrayValue.first else {
-                completion(nil, nil, response.error)
-                return
-            }
-            let name = firstAndOnlyUser["first_name"].stringValue + " " + firstAndOnlyUser["last_name"].stringValue
-            let photoURLString = firstAndOnlyUser["photo_100"].stringValue
-            completion(name, photoURLString, nil)
-        }
-    }
-    
-    func getNewsFeed(completion: @escaping ([News]?, Error?) -> Void) {
         let url = "https://api.vk.com/method/newsfeed.get"
         let parameters: Parameters = [
             "filters": "post, photo",
             "access_token": token,
             "v": 5.80
         ]
+        let request = Alamofire.request(url, parameters: parameters)
         
-        Alamofire.request(url, parameters: parameters).responseJSON { response in
-            guard let value = response.value else {
-                completion(nil, response.error)
-                return
-            }
-            
-            let json = JSON(value)
-            let news = json["response"]["items"].arrayValue.map { News(json: $0,
-                                                                       jsonProfiles: json["response"]["profiles"].arrayValue,
-                                                                       jsonGroups: json["response"]["groups"].arrayValue) }
-            completion(news, nil)
-        }
+        let getNewsOperation = GetDataOperation(request: request)
+        getNewsOperation.qualityOfService = .userInteractive
+        networkQueue.addOperation(getNewsOperation)
+        
+        let parseNews = ParseNews()
+        parseNews.qualityOfService = .userInteractive
+        parseNews.addDependency(getNewsOperation)
+        networkQueue.addOperation(parseNews)
+        
+        let reloadNewsController = ReloadNewsController(vc: vc)
+        reloadNewsController.addDependency(parseNews)
+        OperationQueue.main.addOperation(reloadNewsController)
+        
     }
     
     func setup(token: String, user_id: String) {
