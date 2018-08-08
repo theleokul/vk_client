@@ -43,7 +43,6 @@ class NewsViewController: UITableViewController {
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "PicNewsCell", for: indexPath) as! PicNewsCell
             cell.setup(news: oneNews)
-            sleep(UInt32(0.5))
             return cell
         }
 
