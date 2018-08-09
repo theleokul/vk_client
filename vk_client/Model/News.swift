@@ -9,19 +9,21 @@
 import Foundation
 import SwiftyJSON
 import Kingfisher
+import RealmSwift
 
-class News {
+class News: Object {
     
-    let iconURLString: String
-    let name: String
-    let article: String
-    let articleImageURLString: String
-    let likes: Int
-    let comments: Int
-    let reposts: Int
-    let views: Int
+    @objc dynamic var iconURLString: String = ""
+    @objc dynamic var name: String = ""
+    @objc dynamic var article: String = ""
+    @objc dynamic var articleImageURLString: String = ""
+    @objc dynamic var likes: Int = 0
+    @objc dynamic var comments: Int = 0
+    @objc dynamic var reposts: Int = 0
+    @objc dynamic var views: Int = 0
     
-    init(json: JSON, jsonProfiles: [JSON], jsonGroups: [JSON]) {
+    convenience init(json: JSON, jsonProfiles: [JSON], jsonGroups: [JSON]) {
+        self.init()
         self.article = json["text"].stringValue
         self.likes = json["likes"]["count"].intValue
         self.comments = json["comments"]["count"].intValue
@@ -29,7 +31,7 @@ class News {
         self.views = json["views"]["count"].intValue
         
         
-        // Get icon and name
+        // Get user's icon and name
         let indexProfile = jsonProfiles.index { (jsonProfile) -> Bool in
             return jsonProfile["id"].intValue == json["source_id"].intValue
         }

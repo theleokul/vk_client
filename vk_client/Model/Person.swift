@@ -8,16 +8,19 @@
 
 import UIKit
 import SwiftyJSON
+import RealmSwift
 
-class Person {
-    let user_id: Int
-    let name: String
-    let profileImageURL: URL?
+class Person: Object {
+    @objc dynamic var user_id: Int = 0
+    @objc dynamic var name: String = ""
+    @objc dynamic var profileImageURLString: String = ""
     
-    init(json: JSON) {
+    convenience init(json: JSON) {
+        self.init()
+        
         self.user_id = json["id"].intValue
         self.name = json["first_name"].stringValue + " " + json["last_name"].stringValue
-        self.profileImageURL = URL(string: json["photo_100"].stringValue)
+        self.profileImageURLString = json["photo_100"].stringValue
     }  
     
 }

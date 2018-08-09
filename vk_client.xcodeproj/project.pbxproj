@@ -24,7 +24,6 @@
 		E5B0156921009FC600AAD784 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B0156821009FC600AAD784 /* LoginViewController.swift */; };
 		E5B9C252210795BD008F9404 /* InternalGroupsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B9C251210795BD008F9404 /* InternalGroupsTableViewController.swift */; };
 		E5B9C254210795CB008F9404 /* ExternalGroupsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B9C253210795CB008F9404 /* ExternalGroupsTableViewController.swift */; };
-		E5B9C2592107984D008F9404 /* ExternalGroupsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B9C2582107984D008F9404 /* ExternalGroupsTableViewCell.swift */; };
 		E5B9C25B2107AF0A008F9404 /* GroupsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B9C25A2107AF0A008F9404 /* GroupsTableViewCell.swift */; };
 		E5BEE1042110AB8400BEE74F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5BEE1032110AB8400BEE74F /* Assets.xcassets */; };
 		E5C339B2211080CE0072AA8D /* NewsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5C339B1211080CE0072AA8D /* NewsViewController.swift */; };
@@ -59,7 +58,6 @@
 		E5B0156821009FC600AAD784 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		E5B9C251210795BD008F9404 /* InternalGroupsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InternalGroupsTableViewController.swift; sourceTree = "<group>"; };
 		E5B9C253210795CB008F9404 /* ExternalGroupsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalGroupsTableViewController.swift; sourceTree = "<group>"; };
-		E5B9C2582107984D008F9404 /* ExternalGroupsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalGroupsTableViewCell.swift; sourceTree = "<group>"; };
 		E5B9C25A2107AF0A008F9404 /* GroupsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsTableViewCell.swift; sourceTree = "<group>"; };
 		E5BEE1032110AB8400BEE74F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E5C339B1211080CE0072AA8D /* NewsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsViewController.swift; sourceTree = "<group>"; };
@@ -197,7 +195,6 @@
 			isa = PBXGroup;
 			children = (
 				E5B9C25A2107AF0A008F9404 /* GroupsTableViewCell.swift */,
-				E5B9C2582107984D008F9404 /* ExternalGroupsTableViewCell.swift */,
 			);
 			path = "Second tab (cells)";
 			sourceTree = "<group>";
@@ -327,12 +324,16 @@
 				"${SRCROOT}/Pods/Target Support Files/Pods-vk_client/Pods-vk_client-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework",
+				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kingfisher.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyJSON.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -361,7 +362,6 @@
 				E55DB03D21067CE600E4D5F8 /* FriendsPhotoCollectionViewController.swift in Sources */,
 				E5D3EEE42119B04000337A72 /* GetDataOperation.swift in Sources */,
 				E5069180210A5E41002D20C8 /* Person.swift in Sources */,
-				E5B9C2592107984D008F9404 /* ExternalGroupsTableViewCell.swift in Sources */,
 				E5122301211201710000D91A /* Photo.swift in Sources */,
 				E5B9C254210795CB008F9404 /* ExternalGroupsTableViewController.swift in Sources */,
 				E5B9C25B2107AF0A008F9404 /* GroupsTableViewCell.swift in Sources */,

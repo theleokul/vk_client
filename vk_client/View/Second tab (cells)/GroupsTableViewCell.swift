@@ -17,7 +17,7 @@ class GroupsTableViewCell: UITableViewCell {
     
     func setup(group: Group) {
         self.groupsLabel.text = group.name
-        self.groupsImageView.kf.setImage(with: group.image)
+        self.groupsImageView.kf.setImage(with: URL(string: group.image))
         self.groupsMembersCount.text = "Members: \(group.membersCount)"
         
         // Customization

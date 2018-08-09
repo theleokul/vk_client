@@ -8,22 +8,25 @@
 
 import UIKit
 import SwiftyJSON
+import RealmSwift
 
-class Group: Equatable {
+class Group: Object {
     
-    let id: String
-    let name: String
-    let image: URL?
-    let membersCount: Int
+    @objc dynamic var id: String = ""
+    @objc dynamic var name: String = ""
+    @objc dynamic var image: String = ""
+    @objc dynamic var membersCount: Int = 0
     
     static func == (lhs: Group, rhs: Group) -> Bool {
         return lhs.name == rhs.name
     }
     
-    init(json: JSON) {
+    convenience init(json: JSON) {
+        self.init()
+        
         self.id = json["id"].stringValue
         self.name = json["name"].stringValue
-        self.image = URL(string: json["photo_100"].stringValue)
+        self.image = json["photo_100"].stringValue
         self.membersCount = json["members_count"].intValue
     }
 }

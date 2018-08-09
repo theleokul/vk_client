@@ -16,7 +16,7 @@ class FriendsListTableViewCell: UITableViewCell {
 
     func setup(person: Person) {
         self.friendsNameLabel.text = person.name
-        self.friendsImageView.kf.setImage(with: person.profileImageURL)
+        self.friendsImageView.kf.setImage(with: URL(string: person.profileImageURLString))
         
         // Customization
         self.friendsImageView.layer.cornerRadius = 20

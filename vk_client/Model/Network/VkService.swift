@@ -9,6 +9,7 @@
 import Foundation
 import Alamofire
 import SwiftyJSON
+import RealmSwift
 
 class VKService {
     
@@ -23,7 +24,7 @@ class VKService {
         let parameters: Parameters = [
             "user_id": user_id,
             "order": "hints",
-            //"count": 40,
+            "count": 40,
             "fields": "photo_100, city, domain",
             "access_token": token,
             "v": 5.80
@@ -42,6 +43,13 @@ class VKService {
         }
     }
     
+    func saveFriendsData(_ friends: [Person]) {
+        let realm = try! Realm()
+        try! realm.write {
+            realm.add(friends)
+        }
+    }
+    
     func getPhotosForFriendWithID(_ friendsID: Int, completion: @escaping ([Photo]?, Error?) -> Void) {
         
         let url = "https://api.vk.com/method/photos.get"
@@ -49,7 +57,7 @@ class VKService {
             "owner_id": friendsID,
             "album_id": "wall",
             "rev": 0,
-            //"count": 40,
+            "count": 40,
             "access_token": token,
             "v": 5.80
         ]
@@ -91,7 +99,7 @@ class VKService {
             "user_id": user_id,
             "extended": 1,
             "fields": "members_count",
-            //"count": 40,
+            "count": 40,
             "access_token": token,
             "v": 5.80
         ]
@@ -115,7 +123,7 @@ class VKService {
             "q": q,
             "fields": "members_count",
             "sort": 1,
-            //"count": 40,
+            "count": 40,
             "access_token": token,
             "v": 5.80
         ]

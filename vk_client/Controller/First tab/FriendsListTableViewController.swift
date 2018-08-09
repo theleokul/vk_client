@@ -20,6 +20,10 @@ class FriendsListTableViewController: UITableViewController {
             if let friends = friends {
                 self.friends = friends
                 self.tableView.reloadData()
+                
+                // Just for trying 'RealmStudio'
+                //VKService.shared.saveFriendsData(friends)
+                //print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
             } else {
                 print(error?.localizedDescription ?? "" + "FriendsListTableViewController")
             }
