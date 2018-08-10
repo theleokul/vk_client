@@ -11,6 +11,11 @@ import UIKit
 class InternalGroupsTableViewController: UITableViewController {
     
     var groups = [Group]()
+    let queue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.qualityOfService = .userInteractive
+        return queue
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,7 +45,7 @@ class InternalGroupsTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "InternalGroupCell", for: indexPath) as! GroupsTableViewCell
 
         let group = groups[indexPath.row]
-        cell.setup(group: group)
+        cell.setup(group: group, indexPath: indexPath, tableView: tableView, queue: queue)
 
         return cell
     }

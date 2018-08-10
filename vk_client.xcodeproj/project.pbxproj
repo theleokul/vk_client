@@ -13,6 +13,8 @@
 		E5069186210B0863002D20C8 /* VkLoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5069185210B0863002D20C8 /* VkLoginViewController.swift */; };
 		E5122301211201710000D91A /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5122300211201710000D91A /* Photo.swift */; };
 		E5122303211228310000D91A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E5122302211228310000D91A /* Main.storyboard */; };
+		E5380DFB211D870B00C6AFC8 /* GetCacheImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5380DFA211D870B00C6AFC8 /* GetCacheImage.swift */; };
+		E5380DFF211DA3B500C6AFC8 /* SetImageToRowClasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5380DFE211DA3B500C6AFC8 /* SetImageToRowClasses.swift */; };
 		E539DA2F2114660A0053274C /* News.swift in Sources */ = {isa = PBXBuildFile; fileRef = E539DA2E2114660A0053274C /* News.swift */; };
 		E55DB03621066B1900E4D5F8 /* FriendsListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55DB03521066B1900E4D5F8 /* FriendsListTableViewCell.swift */; };
 		E55DB03821066D1900E4D5F8 /* FriendsPhotoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55DB03721066D1900E4D5F8 /* FriendsPhotoCollectionViewCell.swift */; };
@@ -45,6 +47,8 @@
 		E5069185210B0863002D20C8 /* VkLoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VkLoginViewController.swift; sourceTree = "<group>"; };
 		E5122300211201710000D91A /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		E5122302211228310000D91A /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		E5380DFA211D870B00C6AFC8 /* GetCacheImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetCacheImage.swift; sourceTree = "<group>"; };
+		E5380DFE211DA3B500C6AFC8 /* SetImageToRowClasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetImageToRowClasses.swift; sourceTree = "<group>"; };
 		E539DA2E2114660A0053274C /* News.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = News.swift; sourceTree = "<group>"; };
 		E55DB03521066B1900E4D5F8 /* FriendsListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsListTableViewCell.swift; sourceTree = "<group>"; };
 		E55DB03721066D1900E4D5F8 /* FriendsPhotoCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsPhotoCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -169,6 +173,8 @@
 				E5122300211201710000D91A /* Photo.swift */,
 				E539DA2E2114660A0053274C /* News.swift */,
 				E5D3EEE52119B2C700337A72 /* Network */,
+				E5380DFA211D870B00C6AFC8 /* GetCacheImage.swift */,
+				E5380DFE211DA3B500C6AFC8 /* SetImageToRowClasses.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -348,6 +354,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5380DFF211DA3B500C6AFC8 /* SetImageToRowClasses.swift in Sources */,
 				E5B0156921009FC600AAD784 /* LoginViewController.swift in Sources */,
 				E5069186210B0863002D20C8 /* VkLoginViewController.swift in Sources */,
 				E55DB03621066B1900E4D5F8 /* FriendsListTableViewCell.swift in Sources */,
@@ -359,6 +366,7 @@
 				E5C519A02119BD2400109314 /* ParseNews.swift in Sources */,
 				E5069182210A5E72002D20C8 /* Group.swift in Sources */,
 				E5C339B5211081B30072AA8D /* TextNewsCell.swift in Sources */,
+				E5380DFB211D870B00C6AFC8 /* GetCacheImage.swift in Sources */,
 				E55DB03D21067CE600E4D5F8 /* FriendsPhotoCollectionViewController.swift in Sources */,
 				E5D3EEE42119B04000337A72 /* GetDataOperation.swift in Sources */,
 				E5069180210A5E41002D20C8 /* Person.swift in Sources */,

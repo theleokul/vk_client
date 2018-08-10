@@ -12,7 +12,11 @@ class ExternalGroupsTableViewController: UITableViewController {
 
     @IBOutlet weak var searchBar: UISearchBar!
     
-    
+    let queue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.qualityOfService = .userInteractive
+        return queue
+    }()
     var groups: [Group] = [Group]()
     
     // List of groups which are already subscribed by user
@@ -35,7 +39,7 @@ class ExternalGroupsTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ExternalGroupCell", for: indexPath) as! GroupsTableViewCell
 
         let group = groups[indexPath.row]
-        cell.setup(group: group)
+        cell.setup(group: group, indexPath: indexPath, tableView: tableView, queue: queue)
 
         return cell
     }

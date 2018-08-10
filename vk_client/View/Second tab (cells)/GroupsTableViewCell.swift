@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Kingfisher
+//import Kingfisher
 
 class GroupsTableViewCell: UITableViewCell {
 
@@ -15,9 +15,16 @@ class GroupsTableViewCell: UITableViewCell {
     @IBOutlet weak var groupsLabel: UILabel!
     @IBOutlet weak var groupsMembersCount: UILabel!
     
-    func setup(group: Group) {
+    func setup(group: Group, indexPath: IndexPath, tableView: UITableView, queue: OperationQueue) {
         self.groupsLabel.text = group.name
-        self.groupsImageView.kf.setImage(with: URL(string: group.image))
+        
+        //self.groupsImageView.kf.setImage(with: URL(string: group.image))
+        let getCacheImage = GetCacheImage(url: group.image)
+        let setImageToRow = SetImageToRowWithGroupCell(cell: self, indexPath: indexPath, tableView: tableView)
+        setImageToRow.addDependency(getCacheImage)
+        queue.addOperation(getCacheImage)
+        OperationQueue.main.addOperation(setImageToRow)
+        
         self.groupsMembersCount.text = "Members: \(group.membersCount)"
         
         // Customization

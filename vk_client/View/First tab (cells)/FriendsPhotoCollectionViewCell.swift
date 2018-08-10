@@ -7,26 +7,17 @@
 //
 
 import UIKit
-import Kingfisher
+//import Kingfisher
 
 class FriendsPhotoCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var friendsImageView: UIImageView!
 
-    
-    var imageString: String? {
-        didSet {
-            if let imageString = imageString, let url = URL(string: imageString) {
-                friendsImageView.kf.setImage(with: url)
-            } else {
-                friendsImageView.image = nil
-                friendsImageView.kf.cancelDownloadTask()
-            }
-        }
-    }
-    
-    // CollectionView reuse her cells, so I just clean it up before it displays another picture
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        imageString = nil
+    func setup(imageURLString: String, indexPath: IndexPath, collectionView: UICollectionView, queue: OperationQueue) {
+        //friendsImageView.kf.setImage(with: URL(string: imageURLString))
+        let getCacheImage = GetCacheImage(url: imageURLString)
+        let setImageToRow = SetImageToRowWithFriendsPhotoCell(cell: self, indexPath: indexPath, collectionView: collectionView)
+        setImageToRow.addDependency(getCacheImage)
+        queue.addOperation(getCacheImage)
+        OperationQueue.main.addOperation(setImageToRow)
     }
 }

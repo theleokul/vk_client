@@ -11,6 +11,11 @@ import UIKit
 class NewsViewController: UITableViewController {
 
     var news = [News]()
+    let queue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.qualityOfService = .userInteractive
+        return queue
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,11 +42,11 @@ class NewsViewController: UITableViewController {
     
         if news[index].articleImageURLString == "" {
             let cell = tableView.dequeueReusableCell(withIdentifier: "TextNewsCell", for: indexPath) as! TextNewsCell
-            cell.setup(news: oneNews)
+            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView, queue: queue)
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "PicNewsCell", for: indexPath) as! PicNewsCell
-            cell.setup(news: oneNews)
+            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView, queue: queue)
             return cell
         }
 

@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Kingfisher
+//import Kingfisher
 
 class TextNewsCell: UITableViewCell {
     
@@ -19,8 +19,14 @@ class TextNewsCell: UITableViewCell {
     @IBOutlet weak var repostsLabel: UILabel!
     @IBOutlet weak var viewsLabel: UILabel!
     
-    func setup(news: News) {
-        iconImageView.kf.setImage(with: URL(string: news.iconURLString))
+    func setup(news: News, indexPath: IndexPath, tableView: UITableView, queue: OperationQueue) {
+        //iconImageView.kf.setImage(with: URL(string: news.iconURLString))
+        let getCacheImage = GetCacheImage(url: news.iconURLString)
+        let setImageToRow = SetImageToRowWithTextNewsCell(cell: self, indexPath: indexPath, tableView: tableView)
+        setImageToRow.addDependency(getCacheImage)
+        queue.addOperation(getCacheImage)
+        OperationQueue.main.addOperation(setImageToRow)
+        
         nameLabel.text = news.name
         articleLabel.text = news.article
         likesLabel.text = String(news.likes)

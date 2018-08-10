@@ -24,7 +24,7 @@ class VKService {
         let parameters: Parameters = [
             "user_id": user_id,
             "order": "hints",
-            "count": 40,
+            "count": 300,
             "fields": "photo_100, city, domain",
             "access_token": token,
             "v": 5.80

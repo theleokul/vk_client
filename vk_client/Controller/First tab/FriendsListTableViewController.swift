@@ -11,6 +11,11 @@ import UIKit
 class FriendsListTableViewController: UITableViewController {
     
     var friends: [Person] = [Person]()
+    let queue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.qualityOfService = .userInteractive
+        return queue
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,7 +49,7 @@ class FriendsListTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FriendCell", for: indexPath) as! FriendsListTableViewCell
 
         let person = friends[indexPath.row]
-        cell.setup(person: person)
+        cell.setup(person: person, indexPath: indexPath, tableView: tableView, queue: queue)
 
         return cell
     }

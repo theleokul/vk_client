@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Kingfisher
+//import Kingfisher
 
 class PicNewsCell: UITableViewCell {
 
@@ -20,12 +20,21 @@ class PicNewsCell: UITableViewCell {
     @IBOutlet weak var viewsLabel: UILabel!
     @IBOutlet weak var articleImageWidthConstraint: NSLayoutConstraint!
 
-    func setup(news: News) {
-        iconImageView.kf.setImage(with: URL(string: news.iconURLString))
+    func setup(news: News, indexPath: IndexPath, tableView: UITableView, queue: OperationQueue) {
+        // Setting images
+        //iconImageView.kf.setImage(with: URL(string: news.iconURLString))
+        //articleImageView.kf.setImage(with: URL(string: news.articleImageURLString))
+        let getCacheImageIcon = GetCacheImage(url: news.iconURLString)
+        let getCacheImageContent = GetCacheImage(url: news.articleImageURLString)
+        let setImageToRow = SetImageToRowWithPicNewsCell(cell: self, indexPath: indexPath, tableView: tableView)
+        setImageToRow.addDependency(getCacheImageIcon)
+        setImageToRow.addDependency(getCacheImageContent)
+        queue.addOperation(getCacheImageIcon)
+        queue.addOperation(getCacheImageContent)
+        OperationQueue.main.addOperation(setImageToRow)
+        
         nameLabel.text = news.name
-        articleImageView.kf.indicatorType = .activity
         articleImageWidthConstraint.constant = 430
-        articleImageView.kf.setImage(with: URL(string: news.articleImageURLString))
         likesLabel.text = String(news.likes)
         commentsLabel.text = String(news.comments)
         repostsLabel.text = String(news.reposts)
@@ -36,22 +45,3 @@ class PicNewsCell: UITableViewCell {
         iconImageView.clipsToBounds = true
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-//        if let url = URL(string: news.articleImageURLString) {
-//            KingfisherManager.shared.retrieveImage(with: url, options: nil, progressBlock: nil) {
-//                (image, error, cacheType, url) in
-//                if let image = image {
-//                    self.articleImageView.image = image
-//                }
-//            }
-//        }

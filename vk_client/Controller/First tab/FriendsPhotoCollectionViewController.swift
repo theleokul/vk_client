@@ -12,6 +12,11 @@ class FriendsPhotoCollectionViewController: UICollectionViewController {
 
     var friend: Person?
     var photos = [Photo]()
+    let queue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.qualityOfService = .userInteractive
+        return queue
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,7 +50,7 @@ class FriendsPhotoCollectionViewController: UICollectionViewController {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FriendsPhotoCell", for: indexPath) as! FriendsPhotoCollectionViewCell
     
         let photo = photos[indexPath.row]
-        cell.imageString = photo.imageString
+        cell.setup(imageURLString: photo.imageString, indexPath: indexPath, collectionView: collectionView, queue: queue)
     
         return cell
     }
