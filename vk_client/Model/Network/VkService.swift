@@ -17,6 +17,7 @@ class VKService {
     
     private var token: String = ""
     private var user_id: String = ""
+    private let networkQueue = OperationQueue()
     
     func getFriends(completion: @escaping ([Person]?, Error?) -> Void) {
         
@@ -30,7 +31,7 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, parameters: parameters).responseJSON { response in
+        Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
             guard let value = response.value else {
                 completion(nil, response.error)
                 return
@@ -62,7 +63,7 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, parameters: parameters).responseJSON { response in
+        Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
             guard let value = response.value else {
                 completion(nil, response.error)
                 return
@@ -82,7 +83,7 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, method: .post, parameters: parameters).responseJSON { response in
+        Alamofire.request(url, method: .post, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
             guard let _ = response.value else {
                 completion(response.error)
                 return
@@ -92,7 +93,7 @@ class VKService {
     }
     
     
-    func getGroups(completion: @escaping ([Group]?, Error?) -> Void) {
+    func getGroupsFor(_ vc: InternalGroupsTableViewController) {
         
         let url = "https://api.vk.com/method/groups.get"
         let parameters: Parameters = [
@@ -104,19 +105,24 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, parameters: parameters).responseJSON { response in
-            guard let value = response.value else {
-                completion(nil, response.error)
-                return
-            }
-            
-            let json = JSON(value)
-            let groups = json["response"]["items"].arrayValue.map { Group(json: $0) }
-            completion(groups, nil)
-        }
+        let request = Alamofire.request(url, parameters: parameters)
+        
+        let getGroupsOperation = GetDataOperation(request: request)
+        getGroupsOperation.qualityOfService = .userInteractive
+        networkQueue.addOperation(getGroupsOperation)
+        
+        let parseGroups = ParseGroups()
+        parseGroups.qualityOfService = .userInteractive
+        parseGroups.addDependency(getGroupsOperation)
+        networkQueue.addOperation(parseGroups)
+        
+        let reloadInternalGroupController = ReloadInternalGroupsController(vc: vc)
+        reloadInternalGroupController.addDependency(parseGroups)
+        OperationQueue.main.addOperation(reloadInternalGroupController)
+        
     }
     
-    func getSearchGroups(q: String = "", completion: @escaping ([Group]?, Error?) -> Void) {
+    func getSearchGroupsFor(_ vc: ExternalGroupsTableViewController, q: String = "") {
         
         let url = "https://api.vk.com/method/groups.search"
         let parameters: Parameters = [
@@ -127,17 +133,22 @@ class VKService {
             "access_token": token,
             "v": 5.80
         ]
+
+        let request = Alamofire.request(url, parameters: parameters)
         
-        Alamofire.request(url, parameters: parameters).responseJSON { response in
-            guard let value = response.value else {
-                completion(nil, response.error)
-                return
-            }
-            
-            let json = JSON(value)
-            let groups = json["response"]["items"].arrayValue.map { Group(json: $0) }
-            completion(groups, nil)
-        }
+        let getSearchGroupsOperation = GetDataOperation(request: request)
+        getSearchGroupsOperation.qualityOfService = .userInteractive
+        networkQueue.addOperation(getSearchGroupsOperation)
+        
+        let parseGroups = ParseGroups()
+        parseGroups.qualityOfService = .userInteractive
+        parseGroups.addDependency(getSearchGroupsOperation)
+        networkQueue.addOperation(parseGroups)
+        
+        let reloadExternalGroupController = ReloadExternalGroupsController(vc: vc)
+        reloadExternalGroupController.addDependency(parseGroups)
+        OperationQueue.main.addOperation(reloadExternalGroupController)
+        
     }
     
     func joinGroupWithID(_ id: String, completion: @escaping (Error?) -> Void) {
@@ -148,7 +159,7 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, method: .post, parameters: parameters).responseJSON { response in
+        Alamofire.request(url, method: .post, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
             guard let _ = response.value else {
                 completion(response.error)
                 return
@@ -166,7 +177,7 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, method: .post, parameters: parameters).responseJSON { response in
+        Alamofire.request(url, method: .post, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
             guard let _ = response.value else {
                 completion(response.error)
                 return
@@ -175,8 +186,6 @@ class VKService {
             completion(nil)
         }
     }
-    
-    private let networkQueue = OperationQueue()
     
     func getNewsFeedFor(_ vc: NewsViewController) {
         
@@ -188,14 +197,7 @@ class VKService {
             "access_token": token,
             "v": 5.80
         ]
-        //
-//        let urlT = URL(string: "https://api.vk.com/method/newsfeed.get?filters=post&count=3&access_token=3d77b20f22db542e1d06597fba09dd1d7753e022249b03ffaaf0a82b63229c89b4fe0073c344221fc2d4f&v=5.80")!
-//        let session = URLSession.shared
-//        session.dataTask(with: urlT) { (data, response, error) in
-//            let jsonT = try! JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.allowFragments)
-//            print(jsonT)
-//        }.resume()
-        //
+
         let request = Alamofire.request(url, parameters: parameters)
         
         let getNewsOperation = GetDataOperation(request: request)

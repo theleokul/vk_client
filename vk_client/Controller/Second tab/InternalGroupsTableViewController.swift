@@ -21,14 +21,15 @@ class InternalGroupsTableViewController: UITableViewController {
         super.viewDidLoad()
         
         // Network
-        VKService.shared.getGroups { (groups, error) in
-            if let groups = groups {
-                self.groups = groups
-                self.tableView.reloadData()
-            } else {
-                print(error?.localizedDescription ?? "" + "InternalGroupsTableViewController")
-            }
-        }
+        VKService.shared.getGroupsFor(self)
+//        VKService.shared.getGroups { (groups, error) in
+//            if let groups = groups {
+//                self.groups = groups
+//                self.tableView.reloadData()
+//            } else {
+//                print(error?.localizedDescription ?? "" + "InternalGroupsTableViewController")
+//            }
+//        }
         
         // Customization
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -59,8 +60,10 @@ class InternalGroupsTableViewController: UITableViewController {
                     print("Error while joining group: \(error.localizedDescription)")
                     return
                 }
-                self.groups.remove(at: indexPath.row)
-                self.tableView.deleteRows(at: [indexPath], with: .fade)
+                DispatchQueue.main.async {
+                    self.groups.remove(at: indexPath.row)
+                    self.tableView.deleteRows(at: [indexPath], with: .fade)
+                }
             }
         }   
     }
@@ -85,8 +88,10 @@ class InternalGroupsTableViewController: UITableViewController {
                     print("Error while joining group: \(error.localizedDescription)")
                     return
                 }
-                self.groups.append(externalVC.groups[index])
-                self.tableView.reloadData()
+                DispatchQueue.main.async {
+                    self.groups.append(externalVC.groups[index])
+                    self.tableView.reloadData()
+                }
 
             }
         

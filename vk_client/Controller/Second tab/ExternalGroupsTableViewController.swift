@@ -55,16 +55,7 @@ extension ExternalGroupsTableViewController: UISearchBarDelegate {
             return
         }
         
-        
-        VKService.shared.getSearchGroups(q: searchText) { (groups, error) in
-            if let groups = groups {
-                self.groups = groups
-                self.removeSubscribedGroups()
-                self.tableView.reloadData()
-            } else {
-                print(error?.localizedDescription ?? "" + "ExternalGroupsTableViewController: UISearchBarDelegate")
-            }
-        }
+        VKService.shared.getSearchGroupsFor(self, q: searchText)
     }
     
     func removeSubscribedGroups() {

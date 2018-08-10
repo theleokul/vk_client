@@ -34,8 +34,10 @@ class FriendsPhotoCollectionViewController: UICollectionViewController {
                     print(error?.localizedDescription ?? "" + "FriendsPhotoCollectionViewController")
                     return
                 }
-                self.photos = photos
-                self.collectionView?.reloadData()
+                DispatchQueue.main.async {
+                    self.photos = photos
+                    self.collectionView?.reloadData()
+                }
             }
         }
     }

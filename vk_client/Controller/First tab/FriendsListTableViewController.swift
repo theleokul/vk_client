@@ -23,8 +23,10 @@ class FriendsListTableViewController: UITableViewController {
         // Network
         VKService.shared.getFriends { (friends, error) in
             if let friends = friends {
-                self.friends = friends
-                self.tableView.reloadData()
+                DispatchQueue.main.async {
+                    self.friends = friends
+                    self.tableView.reloadData()
+                }
                 
                 // Just for trying 'RealmStudio'
                 //VKService.shared.saveFriendsData(friends)
@@ -65,8 +67,10 @@ class FriendsListTableViewController: UITableViewController {
                     print("Error while deleting freind: \(error.localizedDescription)")
                     return
                 }
-                self.friends.remove(at: indexPath.row)
-                self.tableView.deleteRows(at: [indexPath], with: .fade)
+                DispatchQueue.main.async {
+                    self.friends.remove(at: indexPath.row)
+                    self.tableView.deleteRows(at: [indexPath], with: .fade)
+                }
             }
         }
     }

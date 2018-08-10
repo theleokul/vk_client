@@ -30,3 +30,21 @@ class ParseNews: Operation {
     }
   
 }
+
+class ParseGroups: Operation {
+    
+    var outputGroups: [Group] = []
+    
+    override func main() {
+        guard let getDataOperation = dependencies.first as? GetDataOperation, let data = getDataOperation.data else { return }
+        
+        do {
+            let json = try JSON(data: data)
+            let groups = json["response"]["items"].arrayValue.map { Group(json: $0) }
+            outputGroups = groups
+        } catch {
+            print("ParseGroups: ", error)
+        }
+    }
+    
+}
