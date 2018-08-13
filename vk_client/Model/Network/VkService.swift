@@ -17,9 +17,14 @@ class VKService {
     
     private var token: String = ""
     private var user_id: String = ""
-    private let networkQueue = OperationQueue()
+    let networkQueue: OperationQueue = {
+        let networkQueue = OperationQueue()
+        networkQueue.qualityOfService = .userInteractive
+        return networkQueue
+    }()
+    let realm = try! Realm(configuration: Realm.Configuration(deleteRealmIfMigrationNeeded: true))
     
-    func getFriends(completion: @escaping ([Person]?, Error?) -> Void) {
+    func getFriends(completion: @escaping (Error?) -> Void) {
         
         let url = "https://api.vk.com/method/friends.get"
         let parameters: Parameters = [
@@ -33,29 +38,35 @@ class VKService {
         
         Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
             guard let value = response.value else {
-                completion(nil, response.error)
+                completion(response.error)
                 return
             }
             
             let json = JSON(value)
             let friends = json["response"]["items"].arrayValue.map { Person(json: $0) }
+            self.saveFriendsToRealm(friends)
             
-            completion(friends, nil)
+            completion(nil)
         }
     }
     
-    func saveFriendsData(_ friends: [Person]) {
-        let realm = try! Realm()
-        try! realm.write {
-            realm.add(friends)
+    func saveFriendsToRealm(_ friends: [Person]) {
+        DispatchQueue.main.async {
+            do {
+                try self.realm.write {
+                    self.realm.add(friends, update: true)
+                }
+            } catch {
+                print("VkService.shared.saveFriendsToRealm: \(error)")
+            }
         }
     }
     
-    func getPhotosForFriendWithID(_ friendsID: Int, completion: @escaping ([Photo]?, Error?) -> Void) {
+    func getPhotosForFriend(_ friend: Person, completion: @escaping (Error?) -> Void) {
         
         let url = "https://api.vk.com/method/photos.get"
         let parameters: Parameters = [
-            "owner_id": friendsID,
+            "owner_id": friend.user_id,
             "album_id": "wall",
             "rev": 0,
             "count": 40,
@@ -65,13 +76,30 @@ class VKService {
         
         Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
             guard let value = response.value else {
-                completion(nil, response.error)
+                completion(response.error)
                 return
             }
             
             let json = JSON(value)
-            let photos = json["response"]["items"].arrayValue.map { Photo(json: $0) }
-            completion(photos, nil)
+            let photos = json["response"]["items"].arrayValue.map { Photo(json: $0, owner: friend) }
+            self.saveFriendsPhotosToRealm(photos, friend: friend)
+            
+            completion(nil)
+        }
+    }
+    
+    func saveFriendsPhotosToRealm(_ photos: [Photo], friend: Person) {
+        DispatchQueue.main.async {
+            let oldPhotos = self.realm.objects(Photo.self).filter("owner = %@", friend)
+            
+            do {
+                try self.realm.write {
+                    self.realm.delete(oldPhotos)
+                    self.realm.add(photos)
+                }
+            } catch {
+                print("VkService.shared.saveFriendsPhotosToRealm: \(error)")
+            }
         }
     }
     
@@ -93,7 +121,7 @@ class VKService {
     }
     
     
-    func getGroupsFor(_ vc: InternalGroupsTableViewController) {
+    func getInternalGroupsFor(_ vc: InternalGroupsTableViewController) {
         
         let url = "https://api.vk.com/method/groups.get"
         let parameters: Parameters = [
@@ -107,22 +135,43 @@ class VKService {
         
         let request = Alamofire.request(url, parameters: parameters)
         
-        let getGroupsOperation = GetDataOperation(request: request)
-        getGroupsOperation.qualityOfService = .userInteractive
+        let getGroupsOperation: GetDataOperation = {
+            let getGroupsOperation = GetDataOperation(request: request)
+            getGroupsOperation.qualityOfService = .userInteractive
+            return getGroupsOperation
+        }()
         networkQueue.addOperation(getGroupsOperation)
         
-        let parseGroups = ParseGroups()
-        parseGroups.qualityOfService = .userInteractive
-        parseGroups.addDependency(getGroupsOperation)
-        networkQueue.addOperation(parseGroups)
+        let parseInternalGroups: ParseInternalGroups = {
+            let parseGroups = ParseInternalGroups()
+            parseGroups.qualityOfService = .userInteractive
+            parseGroups.addDependency(getGroupsOperation)
+            return parseGroups
+        }()
+        networkQueue.addOperation(parseInternalGroups)
         
         let reloadInternalGroupController = ReloadInternalGroupsController(vc: vc)
-        reloadInternalGroupController.addDependency(parseGroups)
+        reloadInternalGroupController.addDependency(parseInternalGroups)
         OperationQueue.main.addOperation(reloadInternalGroupController)
         
     }
     
-    func getSearchGroupsFor(_ vc: ExternalGroupsTableViewController, q: String = "") {
+    func saveInternalGroupsToRealm(_ groups: [Group]) {
+        DispatchQueue.main.async {
+            let oldGroups = self.realm.objects(Group.self)
+            
+            do {
+                try self.realm.write {
+                    self.realm.delete(oldGroups)
+                    self.realm.add(groups)
+                }
+            } catch {
+                print("VkService.shared.saveGroupsToRealm: \(error)")
+            }
+        }
+    }
+    
+    func getExternalSearchGroups(q: String = "", completion: @escaping ([Group]?, Error?) -> Void) {
         
         let url = "https://api.vk.com/method/groups.search"
         let parameters: Parameters = [
@@ -134,20 +183,16 @@ class VKService {
             "v": 5.80
         ]
 
-        let request = Alamofire.request(url, parameters: parameters)
-        
-        let getSearchGroupsOperation = GetDataOperation(request: request)
-        getSearchGroupsOperation.qualityOfService = .userInteractive
-        networkQueue.addOperation(getSearchGroupsOperation)
-        
-        let parseGroups = ParseGroups()
-        parseGroups.qualityOfService = .userInteractive
-        parseGroups.addDependency(getSearchGroupsOperation)
-        networkQueue.addOperation(parseGroups)
-        
-        let reloadExternalGroupController = ReloadExternalGroupsController(vc: vc)
-        reloadExternalGroupController.addDependency(parseGroups)
-        OperationQueue.main.addOperation(reloadExternalGroupController)
+        Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
+            guard let value = response.value else {
+                completion(nil, response.error)
+                return
+            }
+            
+            let json = JSON(value)
+            let groups = json["response"]["items"].arrayValue.map { Group(json: $0) }
+            completion(groups, nil)
+        }
         
     }
     
@@ -213,6 +258,21 @@ class VKService {
         reloadNewsController.addDependency(parseNews)
         OperationQueue.main.addOperation(reloadNewsController)
         
+    }
+    
+    func saveNewsToRealm(_ news: [News]) {
+        DispatchQueue.main.async {
+            let oldNews = self.realm.objects(News.self)
+            
+            do {
+                try self.realm.write {
+                    self.realm.delete(oldNews)
+                    self.realm.add(news)
+                }
+            } catch {
+                print("VkService.shared.saveNewsToRealm: \(error)")
+            }
+        }
     }
     
     func setup(token: String, user_id: String) {

@@ -6,7 +6,7 @@
 //  Copyright © 2018 Leonid Kulikov. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import SwiftyJSON
 import Kingfisher
 import RealmSwift

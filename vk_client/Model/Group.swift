@@ -17,10 +17,6 @@ class Group: Object {
     @objc dynamic var image: String = ""
     @objc dynamic var membersCount: Int = 0
     
-    static func == (lhs: Group, rhs: Group) -> Bool {
-        return lhs.name == rhs.name
-    }
-    
     convenience init(json: JSON) {
         self.init()
         

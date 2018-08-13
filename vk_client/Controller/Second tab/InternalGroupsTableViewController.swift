@@ -11,25 +11,13 @@ import UIKit
 class InternalGroupsTableViewController: UITableViewController {
     
     var groups = [Group]()
-    let queue: OperationQueue = {
-        let queue = OperationQueue()
-        queue.qualityOfService = .userInteractive
-        return queue
-    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Network
-        VKService.shared.getGroupsFor(self)
-//        VKService.shared.getGroups { (groups, error) in
-//            if let groups = groups {
-//                self.groups = groups
-//                self.tableView.reloadData()
-//            } else {
-//                print(error?.localizedDescription ?? "" + "InternalGroupsTableViewController")
-//            }
-//        }
+        groups = Array(VKService.shared.realm.objects(Group.self))
+        VKService.shared.getInternalGroupsFor(self)
         
         // Customization
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -46,7 +34,7 @@ class InternalGroupsTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "InternalGroupCell", for: indexPath) as! GroupsTableViewCell
 
         let group = groups[indexPath.row]
-        cell.setup(group: group, indexPath: indexPath, tableView: tableView, queue: queue)
+        cell.setup(group: group, indexPath: indexPath, tableView: tableView)
 
         return cell
     }
@@ -61,6 +49,13 @@ class InternalGroupsTableViewController: UITableViewController {
                     return
                 }
                 DispatchQueue.main.async {
+                    do {
+                        try VKService.shared.realm.write {
+                            VKService.shared.realm.delete(self.groups[indexPath.row])
+                        }
+                    } catch {
+                        print("InternalGroupsTableViewController: \(error)")
+                    }
                     self.groups.remove(at: indexPath.row)
                     self.tableView.deleteRows(at: [indexPath], with: .fade)
                 }
@@ -90,6 +85,9 @@ class InternalGroupsTableViewController: UITableViewController {
                 }
                 DispatchQueue.main.async {
                     self.groups.append(externalVC.groups[index])
+                    try! VKService.shared.realm.write {
+                        VKService.shared.realm.add(externalVC.groups[index])
+                    }
                     self.tableView.reloadData()
                 }
 

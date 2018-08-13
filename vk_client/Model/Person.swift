@@ -21,6 +21,10 @@ class Person: Object {
         self.user_id = json["id"].intValue
         self.name = json["first_name"].stringValue + " " + json["last_name"].stringValue
         self.profileImageURLString = json["photo_100"].stringValue
-    }  
+    }
+    
+    override static func primaryKey() -> String? {
+        return "user_id"
+    }
     
 }

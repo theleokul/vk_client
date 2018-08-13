@@ -12,11 +12,6 @@ class FriendsPhotoCollectionViewController: UICollectionViewController {
 
     var friend: Person?
     var photos = [Photo]()
-    let queue: OperationQueue = {
-        let queue = OperationQueue()
-        queue.qualityOfService = .userInteractive
-        return queue
-    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,16 +23,17 @@ class FriendsPhotoCollectionViewController: UICollectionViewController {
         }
         
         // Network
-        if let id = friend?.user_id {
-            VKService.shared.getPhotosForFriendWithID(id) { (photos, error) in
-                guard let photos = photos else {
-                    print(error?.localizedDescription ?? "" + "FriendsPhotoCollectionViewController")
-                    return
-                }
-                DispatchQueue.main.async {
-                    self.photos = photos
-                    self.collectionView?.reloadData()
-                }
+        guard let friend = friend else { return }
+        photos = Array(VKService.shared.realm.objects(Photo.self).filter("owner = %@", friend))
+        VKService.shared.getPhotosForFriend(friend) { [weak self] error in
+            if let error = error {
+                print("FriendsPhotoCollectionViewController: \(error)")
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self?.photos = Array(VKService.shared.realm.objects(Photo.self).filter("owner = %@", friend))
+                self?.collectionView?.reloadData()
             }
         }
     }
@@ -52,7 +48,7 @@ class FriendsPhotoCollectionViewController: UICollectionViewController {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FriendsPhotoCell", for: indexPath) as! FriendsPhotoCollectionViewCell
     
         let photo = photos[indexPath.row]
-        cell.setup(imageURLString: photo.imageString, indexPath: indexPath, collectionView: collectionView, queue: queue)
+        cell.setup(imageURLString: photo.imageString, indexPath: indexPath, collectionView: collectionView)
     
         return cell
     }

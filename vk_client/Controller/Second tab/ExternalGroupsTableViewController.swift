@@ -11,12 +11,6 @@ import UIKit
 class ExternalGroupsTableViewController: UITableViewController {
 
     @IBOutlet weak var searchBar: UISearchBar!
-    
-    let queue: OperationQueue = {
-        let queue = OperationQueue()
-        queue.qualityOfService = .userInteractive
-        return queue
-    }()
     var groups: [Group] = [Group]()
     
     // List of groups which are already subscribed by user
@@ -39,7 +33,7 @@ class ExternalGroupsTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ExternalGroupCell", for: indexPath) as! GroupsTableViewCell
 
         let group = groups[indexPath.row]
-        cell.setup(group: group, indexPath: indexPath, tableView: tableView, queue: queue)
+        cell.setup(group: group, indexPath: indexPath, tableView: tableView)
 
         return cell
     }
@@ -55,13 +49,25 @@ extension ExternalGroupsTableViewController: UISearchBarDelegate {
             return
         }
         
-        VKService.shared.getSearchGroupsFor(self, q: searchText)
+        VKService.shared.getExternalSearchGroups(q: searchText) { (groups, error) in
+            if let groups = groups {
+                
+                self.groups = groups
+                self.removeSubscribedGroups()
+                
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            } else {
+                print(error?.localizedDescription ?? "" + "ExternalGroupsTableViewController: UISearchBarDelegate")
+            }
+        }
     }
     
     func removeSubscribedGroups() {
         if let antiGroups = self.antiGroups {
             for i in 0 ..< antiGroups.count {
-                if let index = self.groups.index(where: { (group) in group == antiGroups[i] } ) {
+                if let index = self.groups.index(where: { $0 == antiGroups[i] } ) {
                     self.groups.remove(at: index)
                 }
             }

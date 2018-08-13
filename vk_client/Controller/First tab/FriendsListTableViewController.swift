@@ -11,28 +11,22 @@ import UIKit
 class FriendsListTableViewController: UITableViewController {
     
     var friends: [Person] = [Person]()
-    let queue: OperationQueue = {
-        let queue = OperationQueue()
-        queue.qualityOfService = .userInteractive
-        return queue
-    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
         
         // Network
-        VKService.shared.getFriends { (friends, error) in
-            if let friends = friends {
-                DispatchQueue.main.async {
-                    self.friends = friends
-                    self.tableView.reloadData()
-                }
-                
-                // Just for trying 'RealmStudio'
-                //VKService.shared.saveFriendsData(friends)
-                //print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
-            } else {
-                print(error?.localizedDescription ?? "" + "FriendsListTableViewController")
+        friends = Array(VKService.shared.realm.objects(Person.self))
+        VKService.shared.getFriends { [weak self] error in
+            if let error = error {
+                print("FriendsListTableViewController: \(error)")
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self?.friends = Array(VKService.shared.realm.objects(Person.self))
+                self?.tableView.reloadData()
             }
         }
         
@@ -51,7 +45,7 @@ class FriendsListTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FriendCell", for: indexPath) as! FriendsListTableViewCell
 
         let person = friends[indexPath.row]
-        cell.setup(person: person, indexPath: indexPath, tableView: tableView, queue: queue)
+        cell.setup(person: person, indexPath: indexPath, tableView: tableView)
 
         return cell
     }

@@ -7,25 +7,27 @@
 //
 
 import UIKit
-//import Kingfisher
 
 class FriendsListTableViewCell: UITableViewCell {
 
     @IBOutlet weak var friendsImageView: UIImageView!
     @IBOutlet weak var friendsNameLabel: UILabel!
 
-    func setup(person: Person, indexPath: IndexPath, tableView: UITableView, queue: OperationQueue) {
+    func setup(person: Person, indexPath: IndexPath, tableView: UITableView) {
         self.friendsNameLabel.text = person.name
         
-        //self.friendsImageView.kf.setImage(with: URL(string: person.profileImageURLString))
-        let getCacheImage = GetCacheImage(url: person.profileImageURLString)
-        let setImageToRow = SetImageToRowWithFriendCell(cell: self, indexPath: indexPath, tableView: tableView)
-        setImageToRow.addDependency(getCacheImage)
-        queue.addOperation(getCacheImage)
-        OperationQueue.main.addOperation(setImageToRow)
+        setImageToView(person: person, indexPath: indexPath, tableView: tableView)
         
         // Customization
         self.friendsImageView.layer.cornerRadius = 20
         self.friendsImageView.clipsToBounds = true
+    }
+    
+    func setImageToView(person: Person, indexPath: IndexPath, tableView: UITableView) {
+        let getCacheImage = GetCacheImage(url: person.profileImageURLString)
+        let setImageToRow = SetImageToRowWithFriendCell(cell: self, indexPath: indexPath, tableView: tableView)
+        setImageToRow.addDependency(getCacheImage)
+        VKService.shared.networkQueue.addOperation(getCacheImage)
+        OperationQueue.main.addOperation(setImageToRow)
     }
 }

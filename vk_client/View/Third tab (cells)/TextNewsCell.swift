@@ -7,7 +7,6 @@
 //
 
 import UIKit
-//import Kingfisher
 
 class TextNewsCell: UITableViewCell {
     
@@ -19,13 +18,10 @@ class TextNewsCell: UITableViewCell {
     @IBOutlet weak var repostsLabel: UILabel!
     @IBOutlet weak var viewsLabel: UILabel!
     
-    func setup(news: News, indexPath: IndexPath, tableView: UITableView, queue: OperationQueue) {
-        //iconImageView.kf.setImage(with: URL(string: news.iconURLString))
-        let getCacheImage = GetCacheImage(url: news.iconURLString)
-        let setImageToRow = SetImageToRowWithTextNewsCell(cell: self, indexPath: indexPath, tableView: tableView)
-        setImageToRow.addDependency(getCacheImage)
-        queue.addOperation(getCacheImage)
-        OperationQueue.main.addOperation(setImageToRow)
+    func setup(news: News, indexPath: IndexPath, tableView: UITableView) {
+        
+        // Set image to view in TextNewsCell
+        setImageToView(news: news, indexPath: indexPath, tableView: tableView)
         
         nameLabel.text = news.name
         articleLabel.text = news.article
@@ -37,6 +33,14 @@ class TextNewsCell: UITableViewCell {
         // Customization
         iconImageView.layer.cornerRadius = 20
         iconImageView.clipsToBounds = true
+    }
+    
+    private func setImageToView(news: News, indexPath: IndexPath, tableView: UITableView) {
+        let getCacheImage = GetCacheImage(url: news.iconURLString)
+        let setImageToRow = SetImageToRowWithTextNewsCell(cell: self, indexPath: indexPath, tableView: tableView)
+        setImageToRow.addDependency(getCacheImage)
+        VKService.shared.networkQueue.addOperation(getCacheImage)
+        OperationQueue.main.addOperation(setImageToRow)
     }
     
 }

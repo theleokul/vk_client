@@ -11,16 +11,12 @@ import UIKit
 class NewsViewController: UITableViewController {
 
     var news = [News]()
-    let queue: OperationQueue = {
-        let queue = OperationQueue()
-        queue.qualityOfService = .userInteractive
-        return queue
-    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Network
+        news = Array(VKService.shared.realm.objects(News.self))
         VKService.shared.getNewsFeedFor(self)
         
         // Customization
@@ -42,11 +38,11 @@ class NewsViewController: UITableViewController {
     
         if news[index].articleImageURLString == "" {
             let cell = tableView.dequeueReusableCell(withIdentifier: "TextNewsCell", for: indexPath) as! TextNewsCell
-            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView, queue: queue)
+            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView)
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "PicNewsCell", for: indexPath) as! PicNewsCell
-            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView, queue: queue)
+            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView)
             return cell
         }
 

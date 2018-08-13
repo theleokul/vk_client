@@ -7,7 +7,6 @@
 //
 
 import UIKit
-//import Kingfisher
 
 class PicNewsCell: UITableViewCell {
 
@@ -20,19 +19,11 @@ class PicNewsCell: UITableViewCell {
     @IBOutlet weak var viewsLabel: UILabel!
     @IBOutlet weak var articleImageWidthConstraint: NSLayoutConstraint!
 
-    func setup(news: News, indexPath: IndexPath, tableView: UITableView, queue: OperationQueue) {
-        // Setting images
-        //iconImageView.kf.setImage(with: URL(string: news.iconURLString))
-        //articleImageView.kf.setImage(with: URL(string: news.articleImageURLString))
-        let getCacheImageIcon = GetCacheImage(url: news.iconURLString)
-        let getCacheImageContent = GetCacheImage(url: news.articleImageURLString)
-        let setImageToRow = SetImageToRowWithPicNewsCell(cell: self, indexPath: indexPath, tableView: tableView)
-        setImageToRow.addDependency(getCacheImageIcon)
-        setImageToRow.addDependency(getCacheImageContent)
-        queue.addOperation(getCacheImageIcon)
-        queue.addOperation(getCacheImageContent)
-        OperationQueue.main.addOperation(setImageToRow)
+    func setup(news: News, indexPath: IndexPath, tableView: UITableView) {
         
+        // Setting images
+        setImagesToView(news: news, indexPath: indexPath, tableView: tableView)
+
         nameLabel.text = news.name
         articleImageWidthConstraint.constant = 430
         likesLabel.text = String(news.likes)
@@ -43,5 +34,16 @@ class PicNewsCell: UITableViewCell {
         // Customization
         iconImageView.layer.cornerRadius = 20
         iconImageView.clipsToBounds = true
+    }
+    
+    private func setImagesToView(news: News, indexPath: IndexPath, tableView: UITableView) {
+        let getCacheImageIcon = GetCacheImage(url: news.iconURLString)
+        let getCacheImageContent = GetCacheImage(url: news.articleImageURLString)
+        let setImageToRow = SetImageToRowWithPicNewsCell(cell: self, indexPath: indexPath, tableView: tableView)
+        setImageToRow.addDependency(getCacheImageIcon)
+        setImageToRow.addDependency(getCacheImageContent)
+        VKService.shared.networkQueue.addOperation(getCacheImageIcon)
+        VKService.shared.networkQueue.addOperation(getCacheImageContent)
+        OperationQueue.main.addOperation(setImageToRow)
     }
 }
