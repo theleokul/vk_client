@@ -17,6 +17,7 @@ class ReloadNewsController: Operation {
     
     override func main() {
         vc.news = Array(VKService.shared.realm.objects(News.self))
+        vc.prepareFrames()
         vc.tableView.reloadData()
     }
 }

@@ -29,8 +29,8 @@ class SetImageToRowWithPicNewsCell: Operation {
             let contentImage = getCacheImageContent.outputImage else { return }
         
 //        let parity = contentImage.size.height/contentImage.size.width
-//        cell.articleImageWidthConstraint.constant = tableView.bounds.width * parity
-        
+//        cell.frame = CGRect(origin: CGPoint(x: 0, y: 2 * cell.insets + cell.iconSide),
+//                            size: CGSize(width: tableView.bounds.width, height: tableView.bounds.width * parity))
         if let newIndexPath = tableView.indexPath(for: cell), newIndexPath == indexPath {
             cell.iconImageView.image = icon
             cell.articleImageView.image = contentImage
