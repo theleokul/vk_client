@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import RealmSwift
 
 enum FontsForCells: CGFloat {
     case header = 24.0
@@ -15,23 +16,47 @@ enum FontsForCells: CGFloat {
 
 class NewsViewController: UITableViewController {
 
-    var news = [News]()
+    var news: Results<News>!
     var preparedFramesForEachCell: [NewsFramesPack] = []
+    var notificationToken: NotificationToken?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        pairTableAndRealm()
         
         // Network
-        news = Array(VKService.shared.realm.objects(News.self))
         VKService.shared.getNewsFeedFor(self)
-        
-        // Prepare Data for cells
-        prepareFrames()
         
         // Customization
         navigationController?.navigationBar.prefersLargeTitles = true
         tableView.tableFooterView = UIView()
         
+    }
+    
+    func pairTableAndRealm() {
+        
+        news = DatabaseService.shared.getAllNews()
+        prepareFrames()
+        
+        notificationToken = news.observe({ [weak self] changes in
+            guard let tableView = self?.tableView else { return }
+            switch changes {
+            case .initial:
+                tableView.reloadData()
+            case .update(_, let deletions, let insertions, let modifications):
+                self?.prepareFrames()
+                tableView.beginUpdates()
+                tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                tableView.endUpdates()
+            case .error(let error):
+                fatalError("Realm notification: \(error)")
+            }
+        })
     }
     
     // MARK: - Table view data source

@@ -53,9 +53,9 @@ extension ExternalGroupsTableViewController: UISearchBarDelegate {
             if let groups = groups {
                 
                 self.groups = groups
-                self.removeSubscribedGroups()
                 
                 DispatchQueue.main.async {
+                    self.removeSubscribedGroups()
                     self.tableView.reloadData()
                 }
             } else {
@@ -65,11 +65,10 @@ extension ExternalGroupsTableViewController: UISearchBarDelegate {
     }
     
     func removeSubscribedGroups() {
-        if let antiGroups = self.antiGroups {
-            for i in 0 ..< antiGroups.count {
-                if let index = self.groups.index(where: { $0 == antiGroups[i] } ) {
-                    self.groups.remove(at: index)
-                }
+        guard let antiGroups = antiGroups else { return }
+        for i in 0..<antiGroups.count {
+            if let index = groups.index(where: { Int($0.id) == Int(antiGroups[i].id) } ) {
+                groups.remove(at: index)
             }
         }
     }

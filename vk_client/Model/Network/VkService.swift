@@ -24,7 +24,7 @@ class VKService {
     }()
     let realm = try! Realm(configuration: Realm.Configuration(deleteRealmIfMigrationNeeded: true))
     
-    func getFriends(completion: @escaping (Error?) -> Void) {
+    func getFriends() {
         
         let url = "https://api.vk.com/method/friends.get"
         let parameters: Parameters = [
@@ -38,15 +38,12 @@ class VKService {
         
         Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
             guard let value = response.value else {
-                completion(response.error)
-                return
+                fatalError("VkService getFriends(): \(String(describing: response.error))")
             }
             
             let json = JSON(value)
             let friends = json["response"]["items"].arrayValue.map { Person(json: $0) }
             self.saveFriendsToRealm(friends)
-            
-            completion(nil)
         }
     }
     
@@ -62,7 +59,7 @@ class VKService {
         }
     }
     
-    func getPhotosForFriend(_ friend: Person, completion: @escaping (Error?) -> Void) {
+    func getPhotosForFriend(_ friend: Person) {
         
         let url = "https://api.vk.com/method/photos.get"
         let parameters: Parameters = [
@@ -76,15 +73,12 @@ class VKService {
         
         Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
             guard let value = response.value else {
-                completion(response.error)
-                return
+                fatalError("VkService getPhotosForFriend(): \(String(describing: response.error))")
             }
             
             let json = JSON(value)
             let photos = json["response"]["items"].arrayValue.map { Photo(json: $0, owner: friend) }
             self.saveFriendsPhotosToRealm(photos, friend: friend)
-            
-            completion(nil)
         }
     }
     
@@ -149,10 +143,6 @@ class VKService {
             return parseGroups
         }()
         networkQueue.addOperation(parseInternalGroups)
-        
-        let reloadInternalGroupController = ReloadInternalGroupsController(vc: vc)
-        reloadInternalGroupController.addDependency(parseInternalGroups)
-        OperationQueue.main.addOperation(reloadInternalGroupController)
         
     }
     
@@ -254,9 +244,9 @@ class VKService {
         parseNews.addDependency(getNewsOperation)
         networkQueue.addOperation(parseNews)
         
-        let reloadNewsController = ReloadNewsController(vc: vc)
-        reloadNewsController.addDependency(parseNews)
-        OperationQueue.main.addOperation(reloadNewsController)
+//        let reloadNewsController = ReloadNewsController(vc: vc)
+//        reloadNewsController.addDependency(parseNews)
+//        OperationQueue.main.addOperation(reloadNewsController)
         
     }
     

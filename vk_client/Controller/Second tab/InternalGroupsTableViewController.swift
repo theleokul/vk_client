@@ -7,21 +7,47 @@
 //
 
 import UIKit
+import RealmSwift
 
 class InternalGroupsTableViewController: UITableViewController {
     
-    var groups = [Group]()
+    var groups: Results<Group>!
+    var notificationToken: NotificationToken?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        pairTableAndRealm()
         
         // Network
-        groups = Array(VKService.shared.realm.objects(Group.self))
         VKService.shared.getInternalGroupsFor(self)
         
         // Customization
         navigationController?.navigationBar.prefersLargeTitles = true
         tableView.tableFooterView = UIView()
+    }
+    
+    func pairTableAndRealm() {
+        
+        groups = DatabaseService.shared.getAllGroups()
+        
+        notificationToken = groups.observe({ [weak self] changes in
+            guard let tableView = self?.tableView else { return }
+            switch changes {
+            case .initial:
+                tableView.reloadData()
+            case .update(_, let deletions, let insertions, let modifications):
+                tableView.beginUpdates()
+                tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                tableView.endUpdates()
+            case .error(let error):
+                fatalError("Realm notification: \(error)")
+            }
+        })
     }
 
     // MARK: - Table view data source
@@ -49,15 +75,7 @@ class InternalGroupsTableViewController: UITableViewController {
                     return
                 }
                 DispatchQueue.main.async {
-                    do {
-                        try VKService.shared.realm.write {
-                            VKService.shared.realm.delete(self.groups[indexPath.row])
-                        }
-                    } catch {
-                        print("InternalGroupsTableViewController: \(error)")
-                    }
-                    self.groups.remove(at: indexPath.row)
-                    self.tableView.deleteRows(at: [indexPath], with: .fade)
+                    DatabaseService.shared.deleteGroupAtIndex(indexPath.row)
                 }
             }
         }   
@@ -66,34 +84,28 @@ class InternalGroupsTableViewController: UITableViewController {
     // MARK: - Navigation
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard let controller = segue.destination as? ExternalGroupsTableViewController else {
+        guard let externalVC = segue.destination as? ExternalGroupsTableViewController else {
             return
         }
         
-        controller.antiGroups = groups
+        externalVC.antiGroups = Array(groups)
     }
     
     @IBAction func unwindFromExternal(segue: UIStoryboardSegue) {
-        if let externalVC = segue.source as? ExternalGroupsTableViewController,
-            let index = externalVC.tableView.indexPathForSelectedRow?.row {
+        guard let externalVC = segue.source as? ExternalGroupsTableViewController,
+            let index = externalVC.tableView.indexPathForSelectedRow?.row  else { return }
 
-            let id = externalVC.groups[index].id
-            VKService.shared.joinGroupWithID(id) { (error) in
-                if let error = error {
-                    print("Error while joining group: \(error.localizedDescription)")
-                    return
-                }
-                DispatchQueue.main.async {
-                    self.groups.append(externalVC.groups[index])
-                    try! VKService.shared.realm.write {
-                        VKService.shared.realm.add(externalVC.groups[index])
-                    }
-                    self.tableView.reloadData()
-                }
-
+        let id = externalVC.groups[index].id
+        VKService.shared.joinGroupWithID(id) { (error) in
+            if let error = error {
+                print("Error while joining group: \(error.localizedDescription)")
+                return
             }
-        
+            DispatchQueue.main.async {
+                DatabaseService.shared.addGroup(externalVC.groups[index])
+            }
         }
+        
     }
 
 }

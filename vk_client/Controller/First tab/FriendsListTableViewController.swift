@@ -7,32 +7,49 @@
 //
 
 import UIKit
+import RealmSwift
 
 class FriendsListTableViewController: UITableViewController {
     
-    var friends: [Person] = [Person]()
+    var friends: Results<Person>!
+    var notificationToken: NotificationToken?
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
+        pairTableAndRealm()
         
         // Network
-        friends = Array(VKService.shared.realm.objects(Person.self))
-        VKService.shared.getFriends { [weak self] error in
-            if let error = error {
-                print("FriendsListTableViewController: \(error)")
-                return
-            }
-            
-            DispatchQueue.main.async {
-                self?.friends = Array(VKService.shared.realm.objects(Person.self))
-                self?.tableView.reloadData()
-            }
-        }
+        VKService.shared.getFriends()
         
         // Customization
         navigationController?.navigationBar.prefersLargeTitles = true
         tableView.tableFooterView = UIView()
+    }
+    
+    func pairTableAndRealm() {
+        
+        friends = DatabaseService.shared.getAllFriends()
+        
+        notificationToken = friends.observe({ [weak self] changes in
+            guard let tableView = self?.tableView else { return }
+            switch changes {
+            case .initial:
+                tableView.reloadData()
+            case .update(_, let deletions, let insertions, let modifications):
+                tableView.beginUpdates()
+                tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) },
+                                     with: .automatic)
+                tableView.endUpdates()
+            case .error(let error):
+                fatalError("Realm notification: \(error)")
+            }
+        })
     }
     
     // MARK: - Table view data source
@@ -62,8 +79,7 @@ class FriendsListTableViewController: UITableViewController {
                     return
                 }
                 DispatchQueue.main.async {
-                    self.friends.remove(at: indexPath.row)
-                    self.tableView.deleteRows(at: [indexPath], with: .fade)
+                    DatabaseService.shared.deletePersonAtIndex(indexPath.row)
                 }
             }
         }
