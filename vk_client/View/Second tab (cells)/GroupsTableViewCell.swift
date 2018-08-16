@@ -15,16 +15,15 @@ class GroupsTableViewCell: UITableViewCell {
     @IBOutlet weak var groupsMembersCount: UILabel!
     
     func setup(group: Group, indexPath: IndexPath, tableView: UITableView) {
-        self.groupsLabel.text = group.name
+        groupsLabel.text = group.name
         
         // Set image to groupsImageView
         setImageToView(group: group, indexPath: indexPath, tableView: tableView)
         
-        self.groupsMembersCount.text = "Members: \(group.membersCount)"
+        groupsMembersCount.text = "Members: \(group.membersCount)"
         
         // Customization
-        self.groupsImageView.layer.cornerRadius = 20
-        self.groupsImageView.clipsToBounds = true
+        groupsImageView.layer.cornerRadius = 20
     }
     
     func setImageToView(group: Group, indexPath: IndexPath, tableView: UITableView) {
@@ -33,5 +32,10 @@ class GroupsTableViewCell: UITableViewCell {
         setImageToRow.addDependency(getCacheImage)
         VKService.shared.networkQueue.addOperation(getCacheImage)
         OperationQueue.main.addOperation(setImageToRow)
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        groupsImageView.image = nil
     }
 }

@@ -28,7 +28,6 @@ class NewsViewController: UITableViewController {
         VKService.shared.getNewsFeedFor(self)
         
         // Customization
-        navigationController?.navigationBar.prefersLargeTitles = true
         tableView.tableFooterView = UIView()
         
     }
@@ -44,14 +43,28 @@ class NewsViewController: UITableViewController {
             case .initial:
                 tableView.reloadData()
             case .update(_, let deletions, let insertions, let modifications):
-                self?.prepareFrames()
+                
+                // Before updating tableView, we should update our frames for cells according the new data
+                //self?.prepareFrames() // This is a short but more heavy way to do it
+                // Fast and simple, I hope...
+                var delSnapshot = deletions
+                while !delSnapshot.isEmpty {
+                    self?.preparedFramesForEachCell.remove(at: delSnapshot.removeLast())
+                }
+                self?.prepareFrames(rows: modifications)
+                for i in insertions {
+                    self?.preparedFramesForEachCell.insert(NewsFramesPack(), at: i)
+                    self?.prepareFrames(rows: [i])
+                }
+                // End of updating frames, now we can start to update out tableView
+
                 tableView.beginUpdates()
                 tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
-                                     with: .automatic)
+                                     with: .fade)
                 tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
-                                     with: .automatic)
+                                     with: .fade)
                 tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) },
-                                     with: .automatic)
+                                     with: .fade)
                 tableView.endUpdates()
             case .error(let error):
                 fatalError("Realm notification: \(error)")
@@ -88,7 +101,7 @@ class NewsViewController: UITableViewController {
     
 }
 
-// MARK: - Prepare data for cells
+// MARK: - Prepare frames for cells
 
 extension NewsViewController {
     
@@ -99,10 +112,10 @@ extension NewsViewController {
             iterator += 1
             return iterator
         }
-        prepareDataForCells(rows: arrayWithIndexes)
+        prepareFrames(rows: arrayWithIndexes)
     }
 
-    func prepareDataForCells(rows: [Int]) {
+    func prepareFrames(rows: [Int]) {
         
         for i in rows {
             if news[i].articleImageURLString == "" {
@@ -122,7 +135,8 @@ extension NewsViewController {
             } else {
                 let name: CGRect = nameLabelFrame(text: news[i].name)
                 let icon: CGRect = iconImageViewFrame()
-                let articleImage: CGRect = articleImageFrame(imageURLString: news[i].articleImageURLString)
+                let articleImage: CGRect = articleImageFrame(width: news[i].articleImageWidth,
+                                                             height: news[i].articleImageHeight)
                 let (likes, comments, reposts, views) = socialMediaActivitiesLabelsFrames(articleHeight: articleImage.size.height)
                 
                 preparedFramesForEachCell[i] = NewsFramesPack(nameFrame: name,
@@ -200,53 +214,20 @@ extension NewsViewController {
                 CGRect(origin: viewsOrigin, size: labelSize))
     }
     
-    func getImageViewSize(imageURLString: String) -> CGSize {
-        let url = URL(string: imageURLString)!
-        let data = try! Data(contentsOf: url)
-        guard let image = UIImage(data: data) else { fatalError("Pic does not upload") }
-        let parity = image.size.height / image.size.width
+    func getImageViewSize(width: Int, height: Int) -> CGSize {
+        let parity = CGFloat( height / width )
         let imageWidth: CGFloat = tableView.bounds.width
         let imageHeight: CGFloat = imageWidth * parity
         
         return CGSize(width: ceil(imageWidth), height: ceil(imageHeight))
     }
     
-    func articleImageFrame(imageURLString: String) -> CGRect {
-        let imageViewSize = getImageViewSize(imageURLString: imageURLString)
+    func articleImageFrame(width: Int, height: Int) -> CGRect {
+        let imageViewSize = getImageViewSize(width: width, height: height)
         let imageViewY = 2 * NewsFramesPack.insets + NewsFramesPack.iconSide
         let imageViewOrigin = CGPoint(x: 0.0, y: imageViewY)
         return CGRect(origin: imageViewOrigin, size: imageViewSize)
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-//    fileprivate func calculateImageRow(image: UIImage, indexPath: IndexPath) {
-//        let parity = image.size.height / image.size.width
-//        let imageWidth: CGFloat = tableView.bounds.width
-//        let imageHeight: CGFloat = imageWidth * parity
-//        rowHeightAtIndexPath.append(imageHeight)
-
-
-//        DispatchQueue.main.sync {
-//            let indexPath = IndexPath(row: self.elementsPathArray.count - 1, section: 0)
-//            self.calculateImageRow(image: image, indexPath: indexPath)
-//            self.tableView.beginUpdates()
-//            self.tableView.insertRows(at: [indexPath], with: .bottom)
-//            self.tableView.endUpdates()
-//            self.scrollToLastRow()
-//        }
 
 }
 

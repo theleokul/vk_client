@@ -22,4 +22,9 @@ class FriendsPhotoCollectionViewCell: UICollectionViewCell {
         VKService.shared.networkQueue.addOperation(getCacheImage)
         OperationQueue.main.addOperation(setImageToRow)
     }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        friendsImageView.image = nil
+    }
 }

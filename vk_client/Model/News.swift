@@ -17,6 +17,8 @@ class News: Object {
     @objc dynamic var name: String = ""
     @objc dynamic var article: String = ""
     @objc dynamic var articleImageURLString: String = ""
+    @objc dynamic var articleImageWidth: Int = 0
+    @objc dynamic var articleImageHeight: Int = 0
     @objc dynamic var likes: Int = 0
     @objc dynamic var comments: Int = 0
     @objc dynamic var reposts: Int = 0
@@ -61,9 +63,10 @@ class News: Object {
             let xSizeIndex = photoSizes.index { $0["type"].stringValue == "x" }
             if let xSizeIndex = xSizeIndex {
                 self.articleImageURLString = photoSizes[xSizeIndex]["src"].stringValue
-            } else { self.articleImageURLString = "" }
-            
-        } else { self.articleImageURLString = "" }
+                self.articleImageWidth = photoSizes[xSizeIndex]["width"].intValue
+                self.articleImageHeight = photoSizes[xSizeIndex]["height"].intValue
+            }
+        }
 
     }
 }

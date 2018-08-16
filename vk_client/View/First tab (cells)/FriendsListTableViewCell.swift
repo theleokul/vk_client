@@ -14,13 +14,12 @@ class FriendsListTableViewCell: UITableViewCell {
     @IBOutlet weak var friendsNameLabel: UILabel!
 
     func setup(person: Person, indexPath: IndexPath, tableView: UITableView) {
-        self.friendsNameLabel.text = person.name
+        friendsNameLabel.text = person.name
         
         setImageToView(person: person, indexPath: indexPath, tableView: tableView)
         
         // Customization
-        self.friendsImageView.layer.cornerRadius = 20
-        self.friendsImageView.clipsToBounds = true
+        friendsImageView.layer.cornerRadius = 20
     }
     
     func setImageToView(person: Person, indexPath: IndexPath, tableView: UITableView) {
@@ -29,5 +28,10 @@ class FriendsListTableViewCell: UITableViewCell {
         setImageToRow.addDependency(getCacheImage)
         VKService.shared.networkQueue.addOperation(getCacheImage)
         OperationQueue.main.addOperation(setImageToRow)
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        friendsImageView.image = nil
     }
 }

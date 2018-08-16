@@ -244,10 +244,6 @@ class VKService {
         parseNews.addDependency(getNewsOperation)
         networkQueue.addOperation(parseNews)
         
-//        let reloadNewsController = ReloadNewsController(vc: vc)
-//        reloadNewsController.addDependency(parseNews)
-//        OperationQueue.main.addOperation(reloadNewsController)
-        
     }
     
     func saveNewsToRealm(_ news: [News]) {
