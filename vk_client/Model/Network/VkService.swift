@@ -183,11 +183,10 @@ class VKService {
         
         let url = "https://api.vk.com/method/newsfeed.get"
         let parameters: Parameters = [
-            "filters": "post",
-            //"max_photos": 1,
+            "filters": "post, photo",
+            "returned_banned": 0,
             "photo_sizes": 1,
             "count": 30,
-            "fields": "views",
             "access_token": token,
             "v": 5.80
         ]

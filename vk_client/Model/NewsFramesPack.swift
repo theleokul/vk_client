@@ -14,20 +14,19 @@ struct NewsFramesPack {
     static let iconSide: CGFloat = 60.0
     static let socialMediaActivityHeight: CGFloat = 24.0
     
-    var nameFrame: CGRect = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
-    var iconFrame: CGRect = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
-    var articleOrContentImageFrame: CGRect = CGRect(origin: CGPoint(x: 0, y: 0),
-                                                    size: CGSize(width: 0, height: 0))
-    var likesFrame: CGRect = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
-    var commentsFrame: CGRect = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
-    var repostsFrame: CGRect = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
-    var viewsFrame: CGRect = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
+    var nameFrame: CGRect
+    var iconFrame: CGRect
+    var articleOrContentImageFrame: CGRect
+    var likesFrame: CGRect
+    var commentsFrame: CGRect
+    var repostsFrame: CGRect
+    var viewsFrame: CGRect
     var rowHeight: CGFloat {
         get {
             return (
                 4 * NewsFramesPack.insets +
                 NewsFramesPack.iconSide +
-                articleOrContentImageFrame.height +
+                articleOrContentImageFrame.size.height +
                 NewsFramesPack.socialMediaActivityHeight
             )
         }
@@ -50,6 +49,14 @@ struct NewsFramesPack {
         self.viewsFrame = viewsFrame
     }
     
-    init() {}
+    init() {
+        self.nameFrame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
+        self.iconFrame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
+        self.articleOrContentImageFrame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
+        self.likesFrame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
+        self.commentsFrame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
+        self.repostsFrame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
+        self.viewsFrame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 0, height: 0))
+    }
     
 }

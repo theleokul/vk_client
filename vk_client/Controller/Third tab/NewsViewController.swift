@@ -85,11 +85,13 @@ class NewsViewController: UITableViewController {
     
         if news[index].articleImageURLString == "" {
             let cell = tableView.dequeueReusableCell(withIdentifier: "TextNewsCell", for: indexPath) as! TextNewsCell
-            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView, framesPack: preparedFramesForEachCell[index])
+            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView,
+                       framesPack: preparedFramesForEachCell[index])
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "PicNewsCell", for: indexPath) as! PicNewsCell
-            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView, framesPack: preparedFramesForEachCell[index])
+            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView,
+                       framesPack: preparedFramesForEachCell[index])
             return cell
         }
 
@@ -118,10 +120,11 @@ extension NewsViewController {
     func prepareFrames(rows: [Int]) {
         
         for i in rows {
+            
+            let name: CGRect = nameLabelFrame(text: news[i].name)
+            let icon: CGRect = iconImageViewFrame()
+            
             if news[i].articleImageURLString == "" {
-                
-                let name: CGRect = nameLabelFrame(text: news[i].name)
-                let icon: CGRect = iconImageViewFrame()
                 let article: CGRect = articleLabelFrame(text: news[i].article)
                 let (likes, comments, reposts, views) = socialMediaActivitiesLabelsFrames(articleHeight: article.size.height)
                 
@@ -133,8 +136,6 @@ extension NewsViewController {
                                                               repostsFrame: reposts,
                                                               viewsFrame: views)
             } else {
-                let name: CGRect = nameLabelFrame(text: news[i].name)
-                let icon: CGRect = iconImageViewFrame()
                 let articleImage: CGRect = articleImageFrame(width: news[i].articleImageWidth,
                                                              height: news[i].articleImageHeight)
                 let (likes, comments, reposts, views) = socialMediaActivitiesLabelsFrames(articleHeight: articleImage.size.height)
@@ -215,10 +216,9 @@ extension NewsViewController {
     }
     
     func getImageViewSize(width: Int, height: Int) -> CGSize {
-        let parity = CGFloat( height / width )
+        let parity = CGFloat( Double(height) / Double(width) )
         let imageWidth: CGFloat = tableView.bounds.width
         let imageHeight: CGFloat = imageWidth * parity
-        
         return CGSize(width: ceil(imageWidth), height: ceil(imageHeight))
     }
     

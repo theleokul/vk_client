@@ -47,9 +47,6 @@ class News: Object {
             if let index = indexGroup {
                 self.name = jsonGroups[index]["name"].stringValue
                 self.iconURLString = jsonGroups[index]["photo_100"].stringValue
-            } else {
-                self.name = ""
-                self.iconURLString = ""
             }
         }
         

@@ -193,10 +193,10 @@
 				E5069181210A5E72002D20C8 /* Group.swift */,
 				E5122300211201710000D91A /* Photo.swift */,
 				E539DA2E2114660A0053274C /* News.swift */,
+				E5E9A11121236824004E62C4 /* NewsFramesPack.swift */,
 				E5228D2F2124322C00D2A4A4 /* DatabaseService.swift */,
 				E5D3EEE52119B2C700337A72 /* Network */,
 				E5380E00211DB4F800C6AFC8 /* Cache */,
-				E5E9A11121236824004E62C4 /* NewsFramesPack.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
