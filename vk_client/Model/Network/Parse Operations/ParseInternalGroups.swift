@@ -17,7 +17,7 @@ class ParseInternalGroups: Operation {
         do {
             let json = try JSON(data: data)
             let groups = json["response"]["items"].arrayValue.map { Group(json: $0) }
-            VKService.shared.saveInternalGroupsToRealm(groups)
+            DatabaseService.shared.saveInternalGroupsToRealm(groups)
         } catch {
             print("ParseGroups: ", error)
         }

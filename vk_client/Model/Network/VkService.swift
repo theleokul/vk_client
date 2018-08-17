@@ -22,7 +22,6 @@ class VKService {
         networkQueue.qualityOfService = .userInteractive
         return networkQueue
     }()
-    let realm = try! Realm(configuration: Realm.Configuration(deleteRealmIfMigrationNeeded: true))
     
     func getFriends() {
         
@@ -43,19 +42,7 @@ class VKService {
             
             let json = JSON(value)
             let friends = json["response"]["items"].arrayValue.map { Person(json: $0) }
-            self.saveFriendsToRealm(friends)
-        }
-    }
-    
-    func saveFriendsToRealm(_ friends: [Person]) {
-        DispatchQueue.main.async {
-            do {
-                try self.realm.write {
-                    self.realm.add(friends, update: true)
-                }
-            } catch {
-                print("VkService.shared.saveFriendsToRealm: \(error)")
-            }
+            DatabaseService.shared.saveFriendsToRealm(friends)
         }
     }
     
@@ -78,22 +65,7 @@ class VKService {
             
             let json = JSON(value)
             let photos = json["response"]["items"].arrayValue.map { Photo(json: $0, owner: friend) }
-            self.saveFriendsPhotosToRealm(photos, friend: friend)
-        }
-    }
-    
-    func saveFriendsPhotosToRealm(_ photos: [Photo], friend: Person) {
-        DispatchQueue.main.async {
-            let oldPhotos = self.realm.objects(Photo.self).filter("owner = %@", friend)
-            
-            do {
-                try self.realm.write {
-                    self.realm.delete(oldPhotos)
-                    self.realm.add(photos)
-                }
-            } catch {
-                print("VkService.shared.saveFriendsPhotosToRealm: \(error)")
-            }
+            DatabaseService.shared.saveFriendsPhotosToRealm(photos, friend: friend)
         }
     }
     
@@ -144,21 +116,6 @@ class VKService {
         }()
         networkQueue.addOperation(parseInternalGroups)
         
-    }
-    
-    func saveInternalGroupsToRealm(_ groups: [Group]) {
-        DispatchQueue.main.async {
-            let oldGroups = self.realm.objects(Group.self)
-            
-            do {
-                try self.realm.write {
-                    self.realm.delete(oldGroups)
-                    self.realm.add(groups)
-                }
-            } catch {
-                print("VkService.shared.saveGroupsToRealm: \(error)")
-            }
-        }
     }
     
     func getExternalSearchGroups(q: String = "", completion: @escaping ([Group]?, Error?) -> Void) {
@@ -227,8 +184,10 @@ class VKService {
         let url = "https://api.vk.com/method/newsfeed.get"
         let parameters: Parameters = [
             "filters": "post",
+            //"max_photos": 1,
             "photo_sizes": 1,
             "count": 30,
+            "fields": "views",
             "access_token": token,
             "v": 5.80
         ]
@@ -244,21 +203,6 @@ class VKService {
         parseNews.addDependency(getNewsOperation)
         networkQueue.addOperation(parseNews)
         
-    }
-    
-    func saveNewsToRealm(_ news: [News]) {
-        DispatchQueue.main.async {
-            let oldNews = self.realm.objects(News.self)
-            
-            do {
-                try self.realm.write {
-                    self.realm.delete(oldNews)
-                    self.realm.add(news)
-                }
-            } catch {
-                print("VkService.shared.saveNewsToRealm: \(error)")
-            }
-        }
     }
     
     func setup(token: String, user_id: String) {

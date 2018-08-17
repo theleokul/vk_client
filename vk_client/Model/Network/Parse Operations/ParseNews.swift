@@ -16,12 +16,13 @@ class ParseNews: Operation {
         
         do {
             let json = try JSON(data: data)
+            //print(json)
             let news: [News] = json["response"]["items"]
                                .arrayValue.map {
                                 News(json: $0,
                                      jsonProfiles: json["response"]["profiles"].arrayValue,
                                      jsonGroups: json["response"]["groups"].arrayValue) }
-            VKService.shared.saveNewsToRealm(news)
+            DatabaseService.shared.saveNewsToRealm(news)
         } catch {
             print("ParseNews: ", error)
         }

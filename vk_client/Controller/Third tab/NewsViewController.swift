@@ -56,7 +56,7 @@ class NewsViewController: UITableViewController {
                     self?.preparedFramesForEachCell.insert(NewsFramesPack(), at: i)
                     self?.prepareFrames(rows: [i])
                 }
-                // End of updating frames, now we can start to update out tableView
+                // End of updating frames, now we can start to update our tableView
 
                 tableView.beginUpdates()
                 tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
