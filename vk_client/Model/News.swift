@@ -59,7 +59,7 @@ class News: Object {
             let photoSizes = attachments[photoIndex]["photo"]["sizes"].arrayValue
             let xSizeIndex = photoSizes.index { $0["type"].stringValue == "x" }
             if let xSizeIndex = xSizeIndex {
-                self.articleImageURLString = photoSizes[xSizeIndex]["src"].stringValue
+                self.articleImageURLString = photoSizes[xSizeIndex]["url"].stringValue
                 self.articleImageWidth = photoSizes[xSizeIndex]["width"].intValue
                 self.articleImageHeight = photoSizes[xSizeIndex]["height"].intValue
             }

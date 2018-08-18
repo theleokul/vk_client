@@ -54,8 +54,8 @@ class NewsViewController: UITableViewController {
                 self?.prepareFrames(rows: modifications)
                 for i in insertions {
                     self?.preparedFramesForEachCell.insert(NewsFramesPack(), at: i)
-                    self?.prepareFrames(rows: [i])
                 }
+                self?.prepareFrames(rows: insertions)
                 // End of updating frames, now we can start to update our tableView
 
                 tableView.beginUpdates()
@@ -216,7 +216,7 @@ extension NewsViewController {
     }
     
     func getImageViewSize(width: Int, height: Int) -> CGSize {
-        let parity = CGFloat( Double(height) / Double(width) )
+        let parity = CGFloat( Float(height) / Float(width) )
         let imageWidth: CGFloat = tableView.bounds.width
         let imageHeight: CGFloat = imageWidth * parity
         return CGSize(width: ceil(imageWidth), height: ceil(imageHeight))

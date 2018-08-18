@@ -15,8 +15,7 @@ class ParseNews: Operation {
         guard let getDataOperation = dependencies.first as? GetDataOperation, let data = getDataOperation.data else { return }
         
         do {
-            let json = try JSON(data: data)
-            //print(json)
+            let json = try JSON(data: data, options: JSONSerialization.ReadingOptions.allowFragments)
             let news: [News] = json["response"]["items"]
                                .arrayValue.map {
                                 News(json: $0,

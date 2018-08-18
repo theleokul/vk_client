@@ -19,7 +19,7 @@ class VKService {
     private var user_id: String = ""
     let networkQueue: OperationQueue = {
         let networkQueue = OperationQueue()
-        networkQueue.qualityOfService = .userInteractive
+        networkQueue.qualityOfService = .userInitiated
         return networkQueue
     }()
     
@@ -35,7 +35,7 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
+        Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInitiated)) { response in
             guard let value = response.value else {
                 fatalError("VkService getFriends(): \(String(describing: response.error))")
             }
@@ -58,7 +58,7 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
+        Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInitiated)) { response in
             guard let value = response.value else {
                 fatalError("VkService getPhotosForFriend(): \(String(describing: response.error))")
             }
@@ -77,7 +77,7 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, method: .post, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
+        Alamofire.request(url, method: .post, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInitiated)) { response in
             guard let _ = response.value else {
                 completion(response.error)
                 return
@@ -103,14 +103,14 @@ class VKService {
         
         let getGroupsOperation: GetDataOperation = {
             let getGroupsOperation = GetDataOperation(request: request)
-            getGroupsOperation.qualityOfService = .userInteractive
+            getGroupsOperation.qualityOfService = .userInitiated
             return getGroupsOperation
         }()
         networkQueue.addOperation(getGroupsOperation)
         
         let parseInternalGroups: ParseInternalGroups = {
             let parseGroups = ParseInternalGroups()
-            parseGroups.qualityOfService = .userInteractive
+            parseGroups.qualityOfService = .userInitiated
             parseGroups.addDependency(getGroupsOperation)
             return parseGroups
         }()
@@ -130,7 +130,7 @@ class VKService {
             "v": 5.80
         ]
 
-        Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
+        Alamofire.request(url, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInitiated)) { response in
             guard let value = response.value else {
                 completion(nil, response.error)
                 return
@@ -151,7 +151,7 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, method: .post, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
+        Alamofire.request(url, method: .post, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInitiated)) { response in
             guard let _ = response.value else {
                 completion(response.error)
                 return
@@ -169,7 +169,7 @@ class VKService {
             "v": 5.80
         ]
         
-        Alamofire.request(url, method: .post, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInteractive)) { response in
+        Alamofire.request(url, method: .post, parameters: parameters).responseJSON(queue: DispatchQueue.global(qos: .userInitiated)) { response in
             guard let _ = response.value else {
                 completion(response.error)
                 return
@@ -188,17 +188,16 @@ class VKService {
             "photo_sizes": 1,
             "count": 30,
             "access_token": token,
-            "v": 5.80
+            "v": "5.80"
         ]
-
         let request = Alamofire.request(url, parameters: parameters)
         
         let getNewsOperation = GetDataOperation(request: request)
-        getNewsOperation.qualityOfService = .userInteractive
+        getNewsOperation.qualityOfService = .userInitiated
         networkQueue.addOperation(getNewsOperation)
         
         let parseNews = ParseNews()
-        parseNews.qualityOfService = .userInteractive
+        parseNews.qualityOfService = .userInitiated
         parseNews.addDependency(getNewsOperation)
         networkQueue.addOperation(parseNews)
         
