@@ -27,4 +27,11 @@ class Person: Object {
         return "user_id"
     }
     
+    var toAnyObject: Any {
+        return [
+            "name": name,
+            "profileImg": profileImageURLString
+        ]
+    }
+    
 }

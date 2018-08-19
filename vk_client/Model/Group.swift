@@ -25,4 +25,12 @@ class Group: Object {
         self.image = json["photo_100"].stringValue
         self.membersCount = json["members_count"].intValue
     }
+    
+    var toAnyObject: Any {
+        return [
+            "name": name,
+            "cover": image,
+            "membersCount": membersCount
+        ]
+    }
 }

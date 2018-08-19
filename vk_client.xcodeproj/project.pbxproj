@@ -22,6 +22,7 @@
 		E55DB03B2106792E00E4D5F8 /* FriendsListTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55DB03A2106792E00E4D5F8 /* FriendsListTableViewController.swift */; };
 		E55DB03D21067CE600E4D5F8 /* FriendsPhotoCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55DB03C21067CE600E4D5F8 /* FriendsPhotoCollectionViewController.swift */; };
 		E5687F902113990D00597056 /* PicNewsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5687F8F2113990D00597056 /* PicNewsCell.swift */; };
+		E59EDB4C2129ECB5008C1489 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E59EDB4B2129ECB5008C1489 /* GoogleService-Info.plist */; };
 		E5B0155421009F8200AAD784 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B0155321009F8200AAD784 /* AppDelegate.swift */; };
 		E5B0155E21009F8300AAD784 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E5B0155C21009F8300AAD784 /* LaunchScreen.storyboard */; };
 		E5B0156921009FC600AAD784 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B0156821009FC600AAD784 /* LoginViewController.swift */; };
@@ -62,6 +63,7 @@
 		E55DB03A2106792E00E4D5F8 /* FriendsListTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsListTableViewController.swift; sourceTree = "<group>"; };
 		E55DB03C21067CE600E4D5F8 /* FriendsPhotoCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsPhotoCollectionViewController.swift; sourceTree = "<group>"; };
 		E5687F8F2113990D00597056 /* PicNewsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PicNewsCell.swift; sourceTree = "<group>"; };
+		E59EDB4B2129ECB5008C1489 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		E5B0155021009F8200AAD784 /* vk_client.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = vk_client.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5B0155321009F8200AAD784 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E5B0155D21009F8300AAD784 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 				E5B0156621009F9B00AAD784 /* View */,
 				E5B0156521009F9200AAD784 /* Controller */,
 				E5B0155F21009F8300AAD784 /* Info.plist */,
+				E59EDB4B2129ECB5008C1489 /* GoogleService-Info.plist */,
 				E5BEE1032110AB8400BEE74F /* Assets.xcassets */,
 			);
 			path = vk_client;
@@ -337,6 +340,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E5122303211228310000D91A /* Main.storyboard in Resources */,
+				E59EDB4C2129ECB5008C1489 /* GoogleService-Info.plist in Resources */,
 				E5BEE1042110AB8400BEE74F /* Assets.xcassets in Resources */,
 				E5B0155E21009F8300AAD784 /* LaunchScreen.storyboard in Resources */,
 			);
@@ -371,18 +375,24 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-vk_client/Pods-vk_client-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
 				"${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework",
 				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
 				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework",
+				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kingfisher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftyJSON.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

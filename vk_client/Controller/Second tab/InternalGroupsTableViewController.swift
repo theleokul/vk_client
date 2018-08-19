@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import FirebaseDatabase
 
 class InternalGroupsTableViewController: UITableViewController {
     
@@ -94,6 +95,8 @@ class InternalGroupsTableViewController: UITableViewController {
         guard let externalVC = segue.source as? ExternalGroupsTableViewController,
             let index = externalVC.tableView.indexPathForSelectedRow?.row  else { return }
 
+        addTappedGroupToFirebaseDatabase(externalVC.groups[index])
+        
         let id = externalVC.groups[index].id
         VKService.shared.joinGroupWithID(id) { (error) in
             if let error = error {
@@ -105,6 +108,14 @@ class InternalGroupsTableViewController: UITableViewController {
             }
         }
         
+    }
+    
+    // MARK: - Firebase methods
+    
+    func addTappedGroupToFirebaseDatabase(_ group: Group) {
+        let dbRef = Database.database().reference()
+        dbRef.child("Users").child(VKService.shared.user_id).child("groups")
+            .child(group.id).setValue(group.toAnyObject)
     }
 
 }

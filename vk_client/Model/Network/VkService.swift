@@ -16,12 +16,33 @@ class VKService {
     static let shared = VKService()
     
     private var token: String = ""
-    private var user_id: String = ""
+    var user_id: String = ""
     let networkQueue: OperationQueue = {
         let networkQueue = OperationQueue()
         networkQueue.qualityOfService = .userInitiated
         return networkQueue
     }()
+    
+    func userGet(completion: @escaping (Person) -> Void) {
+        let url = "https://api.vk.com/method/users.get"
+        let parameters: Parameters = [
+            "user_ids": user_id,
+            "fields": "photo_100",
+            "access_token": token,
+            "v": 5.80
+        ]
+        
+        Alamofire.request(url, parameters: parameters).responseJSON(
+            queue: DispatchQueue.global(qos: .userInitiated),
+            options: JSONSerialization.ReadingOptions.allowFragments) { response in
+                guard let value = response.value else {
+                    fatalError("VkService userGet(): \(String(describing: response.error))")
+                }
+                let json = JSON(value)
+                let user = Person(json: json["response"].arrayValue.first!)
+                completion(user)
+        }
+    }
     
     func getFriends() {
         
