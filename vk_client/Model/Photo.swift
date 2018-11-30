@@ -8,13 +8,16 @@
 
 import UIKit
 import SwiftyJSON
+import RealmSwift
 
-struct Photo {
-    let imageString: String?
+class Photo: Object {
+    @objc dynamic var imageString: String = ""
+    @objc dynamic var owner: Person?
     
-    init(json: JSON) {
-        let urlString = json["photo_604"].stringValue
-        self.imageString = urlString
+    convenience init(json: JSON, owner: Person?) {
+        self.init()
+        self.imageString = json["photo_604"].stringValue
+        self.owner = owner
     }
 }
 

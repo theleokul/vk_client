@@ -7,27 +7,48 @@
 //
 
 import UIKit
+import RealmSwift
 
 class FriendsListTableViewController: UITableViewController {
     
-    var friends: [Person] = [Person]()
+    var friends: Results<Person>!
+    var notificationToken: NotificationToken?
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0])
+        pairTableAndRealm()
         
         // Network
-        VKService.shared.getFriends { (friends, error) in
-            if let friends = friends {
-                self.friends = friends
-                self.tableView.reloadData()
-            } else {
-                print(error?.localizedDescription ?? "" + "FriendsListTableViewController")
-            }
-        }
+        VKService.shared.getFriends()
         
         // Customization
-        navigationController?.navigationBar.prefersLargeTitles = true
         tableView.tableFooterView = UIView()
+    }
+    
+    func pairTableAndRealm() {
+        
+        friends = DatabaseService.shared.getAllFriends()
+        
+        notificationToken = friends.observe({ [weak self] changes in
+            guard let tableView = self?.tableView else { return }
+            switch changes {
+            case .initial:
+                tableView.reloadData()
+            case .update(_, let deletions, let insertions, let modifications):
+                tableView.beginUpdates()
+                tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
+                                     with: .fade)
+                tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
+                                     with: .fade)
+                tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) },
+                                     with: .fade)
+                tableView.endUpdates()
+            case .error(let error):
+                fatalError("Realm notification: \(error)")
+            }
+        })
     }
     
     // MARK: - Table view data source
@@ -40,14 +61,14 @@ class FriendsListTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "FriendCell", for: indexPath) as! FriendsListTableViewCell
 
         let person = friends[indexPath.row]
-        cell.setup(person: person)
+        cell.setup(person: person, indexPath: indexPath, tableView: tableView)
 
         return cell
     }
     
     // MARK: - Table view editing
 
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             
             let id = String(friends[indexPath.row].user_id)
@@ -56,8 +77,9 @@ class FriendsListTableViewController: UITableViewController {
                     print("Error while deleting freind: \(error.localizedDescription)")
                     return
                 }
-                self.friends.remove(at: indexPath.row)
-                self.tableView.deleteRows(at: [indexPath], with: .fade)
+                DispatchQueue.main.async {
+                    DatabaseService.shared.deletePersonAtIndex(indexPath.row)
+                }
             }
         }
     }

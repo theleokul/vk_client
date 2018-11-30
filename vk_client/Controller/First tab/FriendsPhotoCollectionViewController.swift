@@ -7,14 +7,17 @@
 //
 
 import UIKit
+import RealmSwift
 
 class FriendsPhotoCollectionViewController: UICollectionViewController {
 
     var friend: Person?
-    var photos = [Photo]()
+    var photos: Results<Photo>!
+    var notificationToken: NotificationToken?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        pairTableAndRealm()
         
         // Calculating title for navigation bar
         if let barName = friend?.name {
@@ -23,16 +26,28 @@ class FriendsPhotoCollectionViewController: UICollectionViewController {
         }
         
         // Network
-        if let id = friend?.user_id {
-            VKService.shared.getPhotosForFriendWithID(id) { (photos, error) in
-                guard let photos = photos else {
-                    print(error?.localizedDescription ?? "" + "FriendsPhotoCollectionViewController")
-                    return
-                }
-                self.photos = photos
-                self.collectionView?.reloadData()
+        guard let friend = friend else { return }
+        VKService.shared.getPhotosForFriend(friend)
+    }
+    
+    func pairTableAndRealm() {
+        photos = DatabaseService.shared.getPhotosFor(friend)
+        
+        notificationToken = photos.observe({ [weak self] changes in
+            guard let collectionView = self?.collectionView else { return }
+            switch changes {
+            case .initial:
+                collectionView.reloadData()
+            case .update(_, let deletions, let insertions, let modifications):
+                collectionView.performBatchUpdates({
+                    collectionView.insertItems(at: insertions.map { IndexPath(row: $0, section: 0) })
+                    collectionView.deleteItems(at: deletions.map { IndexPath(row: $0, section: 0) })
+                    collectionView.reloadItems(at: modifications.map { IndexPath(row: $0, section: 0) })
+                }, completion: nil)
+            case .error(let error):
+                fatalError("Realm notification: \(error)")
             }
-        }
+        })
     }
 
     // MARK: UICollectionViewDataSource
@@ -45,7 +60,7 @@ class FriendsPhotoCollectionViewController: UICollectionViewController {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FriendsPhotoCell", for: indexPath) as! FriendsPhotoCollectionViewCell
     
         let photo = photos[indexPath.row]
-        cell.imageString = photo.imageString
+        cell.setup(imageURLString: photo.imageString, indexPath: indexPath, collectionView: collectionView)
     
         return cell
     }

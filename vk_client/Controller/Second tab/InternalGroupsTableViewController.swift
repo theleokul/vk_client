@@ -7,27 +7,47 @@
 //
 
 import UIKit
+import RealmSwift
+import FirebaseDatabase
 
 class InternalGroupsTableViewController: UITableViewController {
     
-    var groups = [Group]()
+    var groups: Results<Group>!
+    var notificationToken: NotificationToken?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        pairTableAndRealm()
         
         // Network
-        VKService.shared.getGroups { (groups, error) in
-            if let groups = groups {
-                self.groups = groups
-                self.tableView.reloadData()
-            } else {
-                print(error?.localizedDescription ?? "" + "InternalGroupsTableViewController")
-            }
-        }
+        VKService.shared.getInternalGroupsFor(self)
         
         // Customization
-        navigationController?.navigationBar.prefersLargeTitles = true
         tableView.tableFooterView = UIView()
+    }
+    
+    func pairTableAndRealm() {
+        
+        groups = DatabaseService.shared.getAllGroups()
+        
+        notificationToken = groups.observe({ [weak self] changes in
+            guard let tableView = self?.tableView else { return }
+            switch changes {
+            case .initial:
+                tableView.reloadData()
+            case .update(_, let deletions, let insertions, let modifications):
+                tableView.beginUpdates()
+                tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
+                                     with: .fade)
+                tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
+                                     with: .fade)
+                tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) },
+                                     with: .fade)
+                tableView.endUpdates()
+            case .error(let error):
+                fatalError("Realm notification: \(error)")
+            }
+        })
     }
 
     // MARK: - Table view data source
@@ -40,12 +60,12 @@ class InternalGroupsTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "InternalGroupCell", for: indexPath) as! GroupsTableViewCell
 
         let group = groups[indexPath.row]
-        cell.setup(group: group)
+        cell.setup(group: group, indexPath: indexPath, tableView: tableView)
 
         return cell
     }
 
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             
             let id = groups[indexPath.row].id
@@ -54,8 +74,9 @@ class InternalGroupsTableViewController: UITableViewController {
                     print("Error while joining group: \(error.localizedDescription)")
                     return
                 }
-                self.groups.remove(at: indexPath.row)
-                self.tableView.deleteRows(at: [indexPath], with: .fade)
+                DispatchQueue.main.async {
+                    DatabaseService.shared.deleteGroupAtIndex(indexPath.row)
+                }
             }
         }   
     }
@@ -63,29 +84,38 @@ class InternalGroupsTableViewController: UITableViewController {
     // MARK: - Navigation
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard let controller = segue.destination as? ExternalGroupsTableViewController else {
+        guard let externalVC = segue.destination as? ExternalGroupsTableViewController else {
             return
         }
         
-        controller.antiGroups = groups
+        externalVC.antiGroups = Array(groups)
     }
     
     @IBAction func unwindFromExternal(segue: UIStoryboardSegue) {
-        if let externalVC = segue.source as? ExternalGroupsTableViewController,
-            let index = externalVC.tableView.indexPathForSelectedRow?.row {
+        guard let externalVC = segue.source as? ExternalGroupsTableViewController,
+            let index = externalVC.tableView.indexPathForSelectedRow?.row  else { return }
 
-            let id = externalVC.groups[index].id
-            VKService.shared.joinGroupWithID(id) { (error) in
-                if let error = error {
-                    print("Error while joining group: \(error.localizedDescription)")
-                    return
-                }
-                self.groups.append(externalVC.groups[index])
-                self.tableView.reloadData()
-
-            }
+        addTappedGroupToFirebaseDatabase(externalVC.groups[index])
         
+        let id = externalVC.groups[index].id
+        VKService.shared.joinGroupWithID(id) { (error) in
+            if let error = error {
+                print("Error while joining group: \(error.localizedDescription)")
+                return
+            }
+            DispatchQueue.main.async {
+                DatabaseService.shared.addGroup(externalVC.groups[index])
+            }
         }
+        
+    }
+    
+    // MARK: - Firebase methods
+    
+    func addTappedGroupToFirebaseDatabase(_ group: Group) {
+        let dbRef = Database.database().reference()
+        dbRef.child("Users").child(VKService.shared.user_id).child("groups")
+            .child(group.id).setValue(group.toAnyObject)
     }
 
 }

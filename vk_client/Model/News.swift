@@ -6,21 +6,26 @@
 //  Copyright © 2018 Leonid Kulikov. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import SwiftyJSON
+import Kingfisher
+import RealmSwift
 
-class News {
+class News: Object {
     
-    let iconURLString: String
-    let name: String
-    let article: String
-    let articleImageURLString: String
-    let likes: Int
-    let comments: Int
-    let reposts: Int
-    let views: Int
+    @objc dynamic var iconURLString: String = ""
+    @objc dynamic var name: String = ""
+    @objc dynamic var article: String = ""
+    @objc dynamic var articleImageURLString: String = ""
+    @objc dynamic var articleImageWidth: Int = 0
+    @objc dynamic var articleImageHeight: Int = 0
+    @objc dynamic var likes: Int = 0
+    @objc dynamic var comments: Int = 0
+    @objc dynamic var reposts: Int = 0
+    @objc dynamic var views: Int = 0
     
-    init(json: JSON, jsonProfiles: [JSON], jsonGroups: [JSON]) {
+    convenience init(json: JSON, jsonProfiles: [JSON], jsonGroups: [JSON]) {
+        self.init()
         self.article = json["text"].stringValue
         self.likes = json["likes"]["count"].intValue
         self.comments = json["comments"]["count"].intValue
@@ -28,7 +33,7 @@ class News {
         self.views = json["views"]["count"].intValue
         
         
-        // Get icon and name
+        // Get user's icon and name
         let indexProfile = jsonProfiles.index { (jsonProfile) -> Bool in
             return jsonProfile["id"].intValue == json["source_id"].intValue
         }
@@ -42,21 +47,23 @@ class News {
             if let index = indexGroup {
                 self.name = jsonGroups[index]["name"].stringValue
                 self.iconURLString = jsonGroups[index]["photo_100"].stringValue
-            } else {
-                self.name = ""
-                self.iconURLString = ""
             }
         }
         
         // Get article's photo
         let attachments = json["attachments"].arrayValue
         
-        let photoIndex = attachments.index { (attachment) -> Bool in
-            return attachment["type"].stringValue == "photo"
-        }
+        let photoIndex = attachments.index { $0["type"].stringValue == "photo" }
+
         if let photoIndex = photoIndex {
-            self.articleImageURLString = attachments[photoIndex]["photo"]["photo_604"].stringValue
-        } else { self.articleImageURLString = "" }
+            let photoSizes = attachments[photoIndex]["photo"]["sizes"].arrayValue
+            let xSizeIndex = photoSizes.index { $0["type"].stringValue == "x" }
+            if let xSizeIndex = xSizeIndex {
+                self.articleImageURLString = photoSizes[xSizeIndex]["url"].stringValue
+                self.articleImageWidth = photoSizes[xSizeIndex]["width"].intValue
+                self.articleImageHeight = photoSizes[xSizeIndex]["height"].intValue
+            }
+        }
 
     }
 }

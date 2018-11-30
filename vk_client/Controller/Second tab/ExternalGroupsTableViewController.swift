@@ -11,8 +11,6 @@ import UIKit
 class ExternalGroupsTableViewController: UITableViewController {
 
     @IBOutlet weak var searchBar: UISearchBar!
-    
-    
     var groups: [Group] = [Group]()
     
     // List of groups which are already subscribed by user
@@ -35,7 +33,7 @@ class ExternalGroupsTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ExternalGroupCell", for: indexPath) as! GroupsTableViewCell
 
         let group = groups[indexPath.row]
-        cell.setup(group: group)
+        cell.setup(group: group, indexPath: indexPath, tableView: tableView)
 
         return cell
     }
@@ -51,12 +49,15 @@ extension ExternalGroupsTableViewController: UISearchBarDelegate {
             return
         }
         
-        
-        VKService.shared.getSearchGroups(q: searchText) { (groups, error) in
+        VKService.shared.getExternalSearchGroups(q: searchText) { (groups, error) in
             if let groups = groups {
+                
                 self.groups = groups
-                self.removeSubscribedGroups()
-                self.tableView.reloadData()
+                
+                DispatchQueue.main.async {
+                    self.removeSubscribedGroups()
+                    self.tableView.reloadData()
+                }
             } else {
                 print(error?.localizedDescription ?? "" + "ExternalGroupsTableViewController: UISearchBarDelegate")
             }
@@ -64,11 +65,10 @@ extension ExternalGroupsTableViewController: UISearchBarDelegate {
     }
     
     func removeSubscribedGroups() {
-        if let antiGroups = self.antiGroups {
-            for i in 0 ..< antiGroups.count {
-                if let index = self.groups.index(where: { (group) in group == antiGroups[i] } ) {
-                    self.groups.remove(at: index)
-                }
+        guard let antiGroups = antiGroups else { return }
+        for i in 0..<antiGroups.count {
+            if let index = groups.index(where: { Int($0.id) == Int(antiGroups[i].id) } ) {
+                groups.remove(at: index)
             }
         }
     }

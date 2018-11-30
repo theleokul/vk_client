@@ -8,6 +8,7 @@
 
 import UIKit
 import WebKit
+import FirebaseDatabase
 
 class VkLoginViewController: UIViewController {
     
@@ -40,6 +41,11 @@ class VkLoginViewController: UIViewController {
         let request = URLRequest(url: urlComponents.url!)
         webView.load(request)
     }
+    
+    func addLoggedUserToFirebaseDatabase(_ user: Person) {
+        let dbRef = Database.database().reference()
+        dbRef.child("Users").child("\(user.user_id)").setValue(user.toAnyObject)
+    }
 
 }
 
@@ -63,6 +69,11 @@ extension VkLoginViewController: WKNavigationDelegate {
         
         //print(params["access_token"])
         VKService.shared.setup(token: params["access_token"] ?? "", user_id: params["user_id"] ?? "")
+        
+        VKService.shared.userGet { (user) in
+            self.addLoggedUserToFirebaseDatabase(user)
+        }
+        
         decisionHandler(.cancel)
         performSegue(withIdentifier: "Vklogin", sender: self)
     }

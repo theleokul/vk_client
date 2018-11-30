@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AD_UNIT_ID_FOR_BANNER_TEST</key>
+	<string>ca-app-pub-3940256099942544/2934735716</string>
+	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
+	<string>ca-app-pub-3940256099942544/4411468910</string>
+	<key>CLIENT_ID</key>
+	<string>795689969819-j332cc4asr88s3sirgvrgno7r07kkf7t.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.795689969819-j332cc4asr88s3sirgvrgno7r07kkf7t</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCuy8-4F7ZLzfBulYRpAk_JsRNz-4sISIU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>795689969819</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>leonidkulikov.vk-client</string>
+	<key>PROJECT_ID</key>
+	<string>vk-client-01</string>
+	<key>STORAGE_BUCKET</key>
+	<string>vk-client-01.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<true></true>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<false></false>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:795689969819:ios:c226379a8ca1e07e</string>
+	<key>DATABASE_URL</key>
+	<string>https://vk-client-01.firebaseio.com</string>
+</dict>
+</plist>

@@ -7,33 +7,71 @@
 //
 
 import UIKit
+import RealmSwift
+
+enum FontsForCells: CGFloat {
+    case header = 24.0
+    case regular = 20.0
+}
 
 class NewsViewController: UITableViewController {
 
-    var news = [News]()
+    var news: Results<News>!
+    var preparedFramesForEachCell: [NewsFramesPack] = []
+    var notificationToken: NotificationToken?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        pairTableAndRealm()
         
         // Network
-        DispatchQueue.global(qos: .userInteractive).async() {
-            VKService.shared.getNewsFeed { (news, error) in
-                if let news = news {
-                    self.news = news
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                    }
-                } else {
-                    print(error?.localizedDescription ?? "" + "InternalGroupsTableViewController")
-                }
-            }
-        }
+        VKService.shared.getNewsFeedFor(self)
         
         // Customization
-        navigationController?.navigationBar.prefersLargeTitles = true
+        tableView.tableFooterView = UIView()
         
     }
+    
+    func pairTableAndRealm() {
+        
+        news = DatabaseService.shared.getAllNews()
+        prepareFrames()
+        
+        notificationToken = news.observe({ [weak self] changes in
+            guard let tableView = self?.tableView else { return }
+            switch changes {
+            case .initial:
+                tableView.reloadData()
+            case .update(_, let deletions, let insertions, let modifications):
+                
+                // Before updating tableView, we should update our frames for cells according the new data
+                //self?.prepareFrames() // This is a short but more heavy way to do it
+                // Fast and simple, I hope...
+                var delSnapshot = deletions
+                while !delSnapshot.isEmpty {
+                    self?.preparedFramesForEachCell.remove(at: delSnapshot.removeLast())
+                }
+                self?.prepareFrames(rows: modifications)
+                for i in insertions {
+                    self?.preparedFramesForEachCell.insert(NewsFramesPack(), at: i)
+                }
+                self?.prepareFrames(rows: insertions)
+                // End of updating frames, now we can start to update our tableView
 
+                tableView.beginUpdates()
+                tableView.insertRows(at: insertions.map { IndexPath(row: $0, section: 0) },
+                                     with: .fade)
+                tableView.deleteRows(at: deletions.map { IndexPath(row: $0, section: 0) },
+                                     with: .fade)
+                tableView.reloadRows(at: modifications.map { IndexPath(row: $0, section: 0) },
+                                     with: .fade)
+                tableView.endUpdates()
+            case .error(let error):
+                fatalError("Realm notification: \(error)")
+            }
+        })
+    }
+    
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -47,69 +85,154 @@ class NewsViewController: UITableViewController {
     
         if news[index].articleImageURLString == "" {
             let cell = tableView.dequeueReusableCell(withIdentifier: "TextNewsCell", for: indexPath) as! TextNewsCell
-            cell.setup(news: oneNews)
+            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView,
+                       framesPack: preparedFramesForEachCell[index])
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "PicNewsCell", for: indexPath) as! PicNewsCell
-            cell.setup(news: oneNews)
+            cell.setup(news: oneNews, indexPath: indexPath, tableView: tableView,
+                       framesPack: preparedFramesForEachCell[index])
             return cell
         }
 
     }
-        
-        
-        
-        
-        
-        
-        
-//        // Configure the cell...
-//        cell.iconImageView.image = UIImage(named: "ellie4")
-//        cell.nameLabel.text = "Ellie"
-//        cell.articleLabel.text = "Hello, this is my test article for app. I want to test there how text is truncated and how it looks in UI. I am very proud to be on the way of becoming true programmer. Peace!"
-//        //cell.articleImageView.image = UIImage(named: "dawn")
-//        cell.likesLabel.text = "154"
-//        cell.commentsLabel.text = "27"
-//        cell.repostsLabel.text = "14"
-//        cell.viewsLabel.text = "1024"
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return preparedFramesForEachCell[indexPath.row].rowHeight
+    }
+    
+}
 
+// MARK: - Prepare frames for cells
+
+extension NewsViewController {
+    
+    func prepareFrames() {
+        preparedFramesForEachCell = Array(repeating: NewsFramesPack(), count: news.count)
+        var iterator: Int = -1
+        let arrayWithIndexes: [Int] = news.map {_ in
+            iterator += 1
+            return iterator
+        }
+        prepareFrames(rows: arrayWithIndexes)
     }
 
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+    func prepareFrames(rows: [Int]) {
+        
+        for i in rows {
+            
+            let name: CGRect = nameLabelFrame(text: news[i].name)
+            let icon: CGRect = iconImageViewFrame()
+            
+            if news[i].articleImageURLString == "" {
+                let article: CGRect = articleLabelFrame(text: news[i].article)
+                let (likes, comments, reposts, views) = socialMediaActivitiesLabelsFrames(articleHeight: article.size.height)
+                
+                preparedFramesForEachCell[i] = NewsFramesPack(nameFrame: name,
+                                                              iconFrame: icon,
+                                                              articleOrContentImageFrame: article,
+                                                              likesFrame: likes,
+                                                              commentsFrame: comments,
+                                                              repostsFrame: reposts,
+                                                              viewsFrame: views)
+            } else {
+                let articleImage: CGRect = articleImageFrame(width: news[i].articleImageWidth,
+                                                             height: news[i].articleImageHeight)
+                let (likes, comments, reposts, views) = socialMediaActivitiesLabelsFrames(articleHeight: articleImage.size.height)
+                
+                preparedFramesForEachCell[i] = NewsFramesPack(nameFrame: name,
+                                                              iconFrame: icon,
+                                                              articleOrContentImageFrame: articleImage,
+                                                              likesFrame: likes,
+                                                              commentsFrame: comments,
+                                                              repostsFrame: reposts,
+                                                              viewsFrame: views)
+            }
+        }
     }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
+    
+    func getLabelSizeShifted(text: String, font: UIFont) -> CGSize {
+        
+        let maxWidth = tableView.bounds.width - (3 * NewsFramesPack.insets + NewsFramesPack.iconSide)
+        let textBlock = CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude)
+        let rect = text.boundingRect(with: textBlock, options: .truncatesLastVisibleLine,
+                                     attributes: [NSAttributedString.Key.font : font], context: nil)
+        let width = Double(rect.size.width)
+        let height = Double(rect.size.height)
+        let size = CGSize(width: ceil(width), height: ceil(height))
+        return size
     }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
+    
+    func getLabelSize(text: String, font: UIFont) -> CGSize {
+        
+        let maxWidth = tableView.bounds.width - 2 * NewsFramesPack.insets
+        let textBlock = CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude)
+        let rect = text.boundingRect(with: textBlock, options: .usesLineFragmentOrigin,
+                                     attributes: [NSAttributedString.Key.font : font],
+                                     context: nil)
+        let width = Double(rect.size.width)
+        let height = Double(rect.size.height)
+        let size = CGSize(width: ceil(width), height: ceil(height))
+        return size
     }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    
+    func nameLabelFrame(text: String) -> CGRect {
+        let labelSize = getLabelSizeShifted(text: text,
+                                            font: UIFont.systemFont(ofSize: FontsForCells.header.rawValue,
+                                            weight: .semibold))
+        let labelX = 2 * NewsFramesPack.insets + NewsFramesPack.iconSide
+        let labelY = NewsFramesPack.insets + (NewsFramesPack.iconSide - labelSize.height) / 2
+        let labelOrigin = CGPoint(x: labelX, y: labelY)
+        return CGRect(origin: labelOrigin, size: labelSize)
     }
-    */
+    
+    func iconImageViewFrame() -> CGRect {
+        let size = CGSize(width: NewsFramesPack.iconSide, height: NewsFramesPack.iconSide)
+        let origin = CGPoint(x: NewsFramesPack.insets, y: NewsFramesPack.insets)
+        return CGRect(origin: origin, size: size)
+    }
+    
+    func articleLabelFrame(text: String) -> CGRect {
+        let labelSize = getLabelSize(text: text, font: UIFont.systemFont(ofSize: FontsForCells.regular.rawValue, weight: .regular))
+        let labelX = NewsFramesPack.insets
+        let labelY = 2 * NewsFramesPack.insets + NewsFramesPack.iconSide
+        let labelOrigin = CGPoint(x: labelX, y: labelY)
+        return CGRect(origin: labelOrigin, size: labelSize)
+    }
+    
+    func socialMediaActivitiesLabelsFrames(articleHeight: CGFloat) -> (CGRect, CGRect, CGRect, CGRect) {
+        let width = (tableView.bounds.width - 5 * NewsFramesPack.insets) / 4
+        let labelSize = CGSize(width: ceil(width), height: NewsFramesPack.socialMediaActivityHeight)
+        let labelY = 3 * NewsFramesPack.insets + NewsFramesPack.iconSide + articleHeight
+        let likesOrigin = CGPoint(x: NewsFramesPack.insets, y: labelY)
+        let commentsOrigin = CGPoint(x: 2 * NewsFramesPack.insets + width, y: labelY)
+        let repostsOrigin = CGPoint(x: 3 * NewsFramesPack.insets + 2 * width, y: labelY)
+        let viewsOrigin = CGPoint(x: 4 * NewsFramesPack.insets + 3 * width, y: labelY)
+        
+        return (CGRect(origin: likesOrigin, size: labelSize),
+                CGRect(origin: commentsOrigin, size: labelSize),
+                CGRect(origin: repostsOrigin, size: labelSize),
+                CGRect(origin: viewsOrigin, size: labelSize))
+    }
+    
+    func getImageViewSize(width: Int, height: Int) -> CGSize {
+        let parity = CGFloat( Float(height) / Float(width) )
+        let imageWidth: CGFloat = tableView.bounds.width
+        let imageHeight: CGFloat = imageWidth * parity
+        return CGSize(width: ceil(imageWidth), height: ceil(imageHeight))
+    }
+    
+    func articleImageFrame(width: Int, height: Int) -> CGRect {
+        let imageViewSize = getImageViewSize(width: width, height: height)
+        let imageViewY = 2 * NewsFramesPack.insets + NewsFramesPack.iconSide
+        let imageViewOrigin = CGPoint(x: 0.0, y: imageViewY)
+        return CGRect(origin: imageViewOrigin, size: imageViewSize)
+    }
+
+}
+
+
+
+
 
 
